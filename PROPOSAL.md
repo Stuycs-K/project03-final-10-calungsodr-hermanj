@@ -16,25 +16,25 @@ Multiple users will be able to play a text-based multiplayer trivia game through
 
 Topics covered in class:
 
-Forking
+Forking:
 - Each player is a separate process. The main process will fork to allow
 multiple players to join and play simultaneously (on different terminal windows).
 
-Working with files 
+Working with files:
 - Questions and answers will be held on files, one file per topic. 
 - Questions will follow with a colon before the answer, and each Q&A set will be separated by a line break.
 - Formatting: “What is 5+5? : 10”, “What is the capital of the Philippines? : Manila”
 
-Allocating memory
+Allocating memory:
 - Memory will be allocated to store player names, scores, and question/answer text.
 
-Shared memory
+Shared memory:
 - The current question player scores will be tracked with shared memory to keep each process synchronized. 
 
-Pipes
+Pipes:
 - Pipes will allow the host (main process) and players (child processes) to communicate by sending and receiving questions and answers.
 
-Semaphores
+Semaphores:
 - Similar to lab 13, semaphores will be used to control access to the shared memory. Only one player will be allowed to answer a question at a time.
 
 
