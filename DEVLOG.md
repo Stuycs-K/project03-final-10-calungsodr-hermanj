@@ -20,8 +20,7 @@ organization in the host file.
 
 ## JOY HERMAN 
 
-### 2024-01-02 - Brief description
-Expanded description including how much time was spent on task.
+### 2024-01-06 - Wrote basic makefile
+Spent a rough 30 minutes at home writing the makefile and pushing to my own branch
 
-### 2024-01-03 - Brief description
-Expanded description including how much time was spent on task.
+### 2024-01-07
