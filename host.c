@@ -24,21 +24,15 @@ int err(){
   exit(1);
 }
 
-// required
+#define KEY 5849392
+
+// required, might have issues w mac i forgot
 union semun {
   int val;                  //used for SETVAL
   struct semid_ds *buf;     //used for IPC_STAT and IPC_SET
   unsigned short  *array;   //used for SETALL
   struct seminfo  *__buf;
 };   
-
-/*
-Should make the shared memory segment (one integer), 
-semaphore and file called story.txt (open the file with the truncate flag to erase any prior data.)
-Set any values that are needed.
-*/
-
-#define KEY 5849392
 
 /* ---------- SEMAPHORE FOR ACCESS TO ANSWER ------------- */
 void create_semaphore(){
@@ -58,20 +52,13 @@ void remove_semaphore(){
   // remove semaphore
   int semd = semget(KEY, 1, 0);
   if (semd==-1) err();
+
   semctl(semd, IPC_RMID, 0);
 
   view();
 }
 
-
-
-
-
-
-
-
-int semaphore_main(){
-    printf("Attempting to open resource...\n");
+void lock_semaphore(){
   int semd = semget(KEY, 1, 0); // get access
   if (semd==-1) err();
 
@@ -80,40 +67,53 @@ int semaphore_main(){
   sb.sem_flg = SEM_UNDO;
   sb.sem_op = -1; // setting the operation to down (not available)
   semop(semd, &sb, 1); // perform 1 operation w semd and sembuf sb, lock semaphore?
-
-  // open file or something ehre.... ask question perhaps......
-
-    // Prompt the use for the next line to be added to the story.
-    // Read the user input from stdin
-    char question[1000];
-    char buff[1000];
-    question = ask_question(1, buff); // change later TAKE THE QUESTION
-    printf("Here's your next question: %s ", question);
-    char answer[1000];
-    fgets(answer, 1000, stdin);
-    // SEND THIS INPUT TO CHECK_ANSWER(CHAR* ANSWER)
-
-    // ... and write the size to the shared memory . FIXXX
-  *data = strlen(sentence)+1;
-  shmdt(data);
-
-  // Release the semaphore, and end the write program.
-  sb.sem_op = 1; // do i need this??
-  semop(semd, &sb, 1); //perform the operation
-
-  close(file);
-
 }
 
+void unlock_semaphore(){
+  int semd = semget(KEY, 1, 0); // get access
+  if (semd==-1) err();
+
+  struct sembuf sb;
+  sb.sem_num = 0; // sets index of semaphore to work on as 0
+  sb.sem_flg = SEM_UNDO;
+  sb.sem_op = 1; // setting the operation to up (available)
+  semop(semd, &sb, 1); // perform 1 operation w semd and sembuf sb, lock semaphore?
+}
 
 /* ---------------- SEMAPHORE END ----------------------- */
 
 // handles flow of the game, forking(?)
 int main(){
-    // a bunch of stuff should go here (????) with forking and perhaps a server, we should figure that out
-    return 0;
-    printf("Player %d, here's your next question: "); 
-    ask_question(1); // 1 is a placeholder
+
+    // create shared memory .,.. ?? initialize
+
+    // should create player pipes here as well..?
+
+    // access!
+    create_semaphore();
+
+    printf("welcome, instructions here...\n");
+    printf("Player 1, please choose a topic (History, Science, Math): ");
+    char topic[20];
+    fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
+
+    // get file_name by adding .txt to the end of chosen topic
+    char file_name[20];
+    snprintf(file_name, sizeof(file_name), "%s.txt", topic);
+
+    // open file... use the method that joy is writing??
+    // if file doesnt work, remove the semaphore and stop...
+
+    // fork a server for every player... have to figure out what to do with that
+
+    while(1){
+      lock_semaphore();
+      // use ask_question method to print the question....
+      // if it ran out of questions, say that and then break the loop to end the game
+
+      unlock_semaphore();
+    }
+    // close file remove semaphore game end???
 }
 
 /* Called in main whenever the host should ask another question.
