@@ -25,6 +25,9 @@ int err(){
 }
 
 #define KEY 5849392
+static int histq_num;
+static int geoq_num;
+static int mathq_num;
 // !!!!!
 // UNCOMMENT WHEN DONEEEEEEE!!!!!
 // !!!!!
@@ -98,8 +101,9 @@ int main(){
     char topic[20];
     fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
 
-	//get rid of \n
+	//get rid of \n and lowercase all
 	for (int i = 0; i < sizeof(topic); i++) {
+		topic[i] = tolower(topic[i]);
 		if (topic[i] == '\n') {
 			topic[i] = '\0';
 			i = sizeof(topic);
@@ -150,7 +154,21 @@ void find_question(char * topic) {
 	char line[1000];
 	char* question;
 	char* answer;
-	fgets(line, sizeof(line), readfile);
+	if (strcmp(topic, "history") == 0) {
+		for (int i = 0; i <= histq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
+	else if (strcmp(topic, "geography") == 0) {
+		for (int i = 0; i <= geoq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
+	else if (strcmp(topic, "math") == 0) {
+		for (int i = 0; i <= mathq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
 	char * linepointer = line;
 	question = strsep(&linepointer, ":");
 	printf("question: %s\n", question);

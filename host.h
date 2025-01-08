@@ -11,13 +11,10 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <sys/ipc.h>
+#include <ctype.h>
 
 #ifndef HOST_H
 #define HOST_H
-
-#define histq_num 0
-#define geoq_num 0
-#define mathq_num 0
 
 int main();
 char* ask_question(int file_des, char* question);
