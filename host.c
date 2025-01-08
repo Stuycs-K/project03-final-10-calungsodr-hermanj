@@ -21,16 +21,31 @@ to the next question.
 // handles flow of the game, forking(?)
 int main(){
     // a bunch of stuff should go here (????) with forking and perhaps a server, we should figure that out
-    return 0;
-    printf("Player %d, here's your next question: "); 
+    printf("Player %d, here's your next question: ", 1);
     ask_question(1); // 1 is a placeholder
+	find_question("history");
+	return 0;
 }
 
 /* Called in main whenever the host should ask another question.
 "q_num" refers to the question number to be asked. This function will go through the Q&A file
 and ask the corresponding question. */
-void ask_question(int q_num){
-    char* question;
-    // question should be found by searching through the file
-    printf("%s\n", question);
+//copy the code for check_answer(char* answer)s
+char* ask_question(int file_des, char* question){ //change later
+    // question should be found by searching through the file with q_num as the number question
+	printf("%s\n", question);
+	return question;
 }
+
+char* find_question(char * topic) {
+	int readfile;
+	char topicbuff[20];
+	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
+	printf("%s\n", topicbuff);
+	readfile = open(topicbuff, , O_RDONLY, 0);
+	if (readfile == -1) {
+		err();
+	}
+	return topic;
+}
+
