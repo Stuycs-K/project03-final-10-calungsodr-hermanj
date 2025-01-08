@@ -14,6 +14,10 @@ Spent 40 minutes in classs starting access with semaphores and writing
 question/answer files. Worked with joy on modifying headers for 
 organization in the host file.
 
+Spent 40 minutes at home writing more of the host.c file, reorganizing
+semaphore work and creating separate functions. I also left comments
+regarding how to move forward.
+
 
 
 # ------------------------------------------------- #
