@@ -25,14 +25,16 @@ int err(){
 }
 
 #define KEY 5849392
-
-// required, might have issues w mac i forgot
-union semun {
+// !!!!!
+// UNCOMMENT WHEN DONEEEEEEE!!!!!
+// !!!!!
+// required, might have issues w mac i forgot yea it does
+/*union semun {
   int val;                  //used for SETVAL
   struct semid_ds *buf;     //used for IPC_STAT and IPC_SET
   unsigned short  *array;   //used for SETALL
   struct seminfo  *__buf;
-};   
+};   */
 
 /* ---------- SEMAPHORE FOR ACCESS TO ANSWER ------------- */
 void create_semaphore(){
@@ -54,8 +56,8 @@ void remove_semaphore(){
   if (semd==-1) err();
 
   semctl(semd, IPC_RMID, 0);
-
-  view();
+// wasn't defined yet
+  //view();
 }
 
 void lock_semaphore(){
@@ -84,7 +86,6 @@ void unlock_semaphore(){
 
 // handles flow of the game, forking(?)
 int main(){
-
     // create shared memory .,.. ?? initialize
 
     // should create player pipes here as well..?
@@ -97,9 +98,16 @@ int main(){
     char topic[20];
     fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
 
+	//get rid of \n
+	for (int i = 0; i < sizeof(topic); i++) {
+		if (topic[i] == '\n') {
+			topic[i] = '\0';
+			i = sizeof(topic);
+		}
+	}
+	
     // get file_name by adding .txt to the end of chosen topic
-    char file_name[20];
-    snprintf(file_name, sizeof(file_name), "%s.txt", topic);
+	find_question(topic);
 
     // open file... use the method that joy is writing??
     // if file doesnt work, remove the semaphore and stop...
@@ -114,13 +122,39 @@ int main(){
       unlock_semaphore();
     }
     // close file remove semaphore game end???
+	printf("Player %d, here's your next question: ", 1);
+	char buff[1000];
+	ask_question(1, buff); // 1 is a placeholder
+	return 0;
 }
 
 /* Called in main whenever the host should ask another question.
 "q_num" refers to the question number to be asked. This function will go through the Q&A file
 and ask the corresponding question. */
-void ask_question(int q_num){
-    char* question;
-    // question should be found by searching through the file
-    printf("%s\n", question);
+//copy the code for check_answer(char* answer)s
+char* ask_question(int file_des, char* question){ //change later
+    // question should be found by searching through the file with q_num as the number question
+	printf("%s\n", question);
+	return question;
 }
+
+void find_question(char * topic) {
+	char topicbuff[20];
+	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
+	//printf("%s\n", topicbuff);
+	FILE * readfile;
+	readfile = fopen(topicbuff, "r");
+	if (readfile == NULL) {
+		err();
+	}
+	char line[1000];
+	char* question;
+	char* answer;
+	fgets(line, sizeof(line), readfile);
+	char * linepointer = line;
+	question = strsep(&linepointer, ":");
+	printf("question: %s\n", question);
+	answer = strsep(&linepointer, "\n");
+	printf("answer: %s\n", answer);
+}
+

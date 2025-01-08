@@ -15,7 +15,12 @@
 #ifndef HOST_H
 #define HOST_H
 
-    int main();
-    void ask_question();
+#define histq_num 0
+#define geoq_num 0
+#define mathq_num 0
+
+int main();
+char* ask_question(int file_des, char* question);
+void find_question(char* topic);
 
 #endif
