@@ -1,4 +1,5 @@
 #include "host.h"
+#include "semaphore.h"
 
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
 
@@ -18,87 +19,43 @@ to the next question.
 
 */
 
+// for pipe, look for sigpipe
+// SIGNAL HANDLING
+static void sighandler(int signo){
+    if (signo == SIGINT){
+      printf("\nDisconnected, game over");
+      exit(0);
+    }
+    if (signo == SIGPIPE){
+      printf("\nDisconnected pipe.\n");
+    }
+}
+
 //prints errno
 int err(){
   printf("Error %d: %s\n", errno, strerror(errno));
   exit(1);
 }
 
-#define KEY 5849392
-// !!!!!
-// UNCOMMENT WHEN DONEEEEEEE!!!!!
-// !!!!!
-// required, might have issues w mac i forgot yea it does
-/*union semun {
-  int val;                  //used for SETVAL
-  struct semid_ds *buf;     //used for IPC_STAT and IPC_SET
-  unsigned short  *array;   //used for SETALL
-  struct seminfo  *__buf;
-};   */
-
-/* ---------- SEMAPHORE FOR ACCESS TO ANSWER ------------- */
-void create_semaphore(){
-    // create semaphore (blocks write access when it's not the right turn)
-    int semd = semget(KEY, 1, IPC_CREAT | 0600);
-    if (semd==-1) err();
-
-    // initialize semaphore value to 1, making it availible
-    union semun us;
-    us.val = 1; // make us = 1 availible
-    semctl(semd, 0, SETVAL, us); // set the value to us... currently 1, meaning available!!
-}
-
-// Remove the shared memory and the semaphore
-void remove_semaphore(){
-  printf("Removed shared memory and semaphore.\n");
-  // remove semaphore
-  int semd = semget(KEY, 1, 0);
-  if (semd==-1) err();
-
-  semctl(semd, IPC_RMID, 0);
-// wasn't defined yet
-  //view();
-}
-
-void lock_semaphore(){
-  int semd = semget(KEY, 1, 0); // get access
-  if (semd==-1) err();
-
-  struct sembuf sb;
-  sb.sem_num = 0; // sets index of semaphore to work on as 0
-  sb.sem_flg = SEM_UNDO;
-  sb.sem_op = -1; // setting the operation to down (not available)
-  semop(semd, &sb, 1); // perform 1 operation w semd and sembuf sb, lock semaphore?
-}
-
-void unlock_semaphore(){
-  int semd = semget(KEY, 1, 0); // get access
-  if (semd==-1) err();
-
-  struct sembuf sb;
-  sb.sem_num = 0; // sets index of semaphore to work on as 0
-  sb.sem_flg = SEM_UNDO;
-  sb.sem_op = 1; // setting the operation to up (available)
-  semop(semd, &sb, 1); // perform 1 operation w semd and sembuf sb, lock semaphore?
-}
-
-/* ---------------- SEMAPHORE END ----------------------- */
-
 // handles flow of the game, forking(?)
 int main(){
-    // create shared memory .,.. ?? initialize
 
-    // should create player pipes here as well..?
+    // for signals
+    signal(SIGPIPE, sighandler);
+    signal(SIGINT, sighandler);
 
-    // access!
+    // get access!
     create_semaphore();
 
+    // should create player pipes here as well..? not sure
+    // array of pipes
+
     printf("welcome, instructions here...\n");
-    printf("Player 1, please choose a topic (History, Science, Math): ");
+    printf("Player 1, please choose a topic (History, Geography, Math): ");
     char topic[20];
     fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
 
-	//get rid of \n
+	// get rid of \n
 	for (int i = 0; i < sizeof(topic); i++) {
 		if (topic[i] == '\n') {
 			topic[i] = '\0';
@@ -106,8 +63,7 @@ int main(){
 		}
 	}
 	
-    // get file_name by adding .txt to the end of chosen topic
-	find_question(topic);
+  // get file_name by adding .txt to the end of chosen topic
 
     // open file... use the method that joy is writing??
     // if file doesnt work, remove the semaphore and stop...
@@ -115,7 +71,9 @@ int main(){
     // fork a server for every player... have to figure out what to do with that
 
     while(1){
+      // loop through the pipes to speak to a specific one
       lock_semaphore();
+      find_question(topic);
       // use ask_question method to print the question....
       // if it ran out of questions, say that and then break the loop to end the game
 
