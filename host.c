@@ -86,7 +86,8 @@ void unlock_semaphore(){
 int main(){
 
     // create shared memory .,.. ?? initialize
-    // open file or something ehre.... ask question perhaps......
+
+    // should create player pipes here as well..?
 
     // access!
     create_semaphore();
@@ -94,7 +95,7 @@ int main(){
     printf("welcome, instructions here...\n");
     printf("Player 1, please choose a topic (History, Science, Math): ");
     char topic[20];
-    fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow
+    fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
 
     // get file_name by adding .txt to the end of chosen topic
     char file_name[20];
@@ -103,12 +104,12 @@ int main(){
     // open file... use the method that joy is writing??
     // if file doesnt work, remove the semaphore and stop...
 
+    // fork a server for every player... have to figure out what to do with that
+
     while(1){
       lock_semaphore();
       // use ask_question method to print the question....
       // if it ran out of questions, say that and then break the loop to end the game
-
-      // use pipes to communicate w the players </3
 
       unlock_semaphore();
     }
