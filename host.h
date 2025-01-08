@@ -20,7 +20,7 @@
 #define mathq_num 0
 
 int main();
-void ask_question(int file_des);
-char* find_question(char* topic);
+char* ask_question(int file_des, char* question);
+void find_question(char* topic);
 
 #endif
