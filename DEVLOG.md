@@ -18,6 +18,10 @@ Spent 40 minutes at home writing more of the host.c file, reorganizing
 semaphore work and creating separate functions. I also left comments
 regarding how to move forward.
 
+### 2024-01-08 - Semaphores and signals
+Spent 40 minutes in classs creating separate semaphore.c and semaphone.h
+files. Added signals for graceful exiting. Tested and cleaned up comments.
+
 
 
 # ------------------------------------------------- #
