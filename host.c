@@ -1,5 +1,4 @@
 #include "host.h"
-#include "semaphore.h"
 
 #define MAX_PLAYERS 5 // ten players max can play
 
@@ -14,31 +13,31 @@ GAME HOST (main) should:
 4. Print out a list of topics (ex. history, science, math) for player 1 to choose from. 
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
-6. Allow the players to take turns to enter in answers (with semaphores) until somebody's
-response matches the current stored answer. Add one point to that player, then move on
+6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
 to the next question.
 7. Keep asking questions until a user types "end game" or the Q&A file ends.
 
 */
 
-static int histq_num;
-static int geoq_num;
-static int mathq_num;
+static int histq_num = 0;
+static int geoq_num = 0;
+static int mathq_num = 0;
+
+void delete_pipes(){
+  for (int i = 0; i<MAX_PLAYERS; i++){
+    char pipe_name[10];
+    snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
+    unlink(pipe_name);
+  }
+}
 
 // for pipe, look for sigpipe
 // SIGNAL HANDLING
 static void sighandler(int signo){
     if (signo == SIGINT){
       printf("\nDisconnected, game over");
-      remove_semaphore();
-      // to delete all pipe files
-      for (int i = 0; i<MAX_PLAYERS; i++){
-        char pipe_name[10];
-        snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
-        unlink(pipe_name);
-      }
+      delete_pipes();
       exit(0);
-      
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
@@ -52,11 +51,7 @@ int main(){
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
 
-    // get access!
-    create_semaphore();
-
-    // should create player pipes here as well..? not sure
-    // array of pipes
+    // creates array of player pipes
     for (int i = 0; i<MAX_PLAYERS; i++){
       char pipe_name[10];
       snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
@@ -89,8 +84,6 @@ int main(){
 
     while(1){
       // loop through the pipes to speak to a specific one
-      lock_semaphore();
-
       find_question(topic, question, answer);
 
       // if it ran out of questions, say that and then break the loop to end the game
@@ -98,9 +91,6 @@ int main(){
         printf("No more questions! Game over."); // separate display points function
         break;
       }
-
-      // blocks access
-      unlock_semaphore();
 
       // asks the next player the question
       printf("Player %d, here's your question:\n%s\n", curr_player,question);
@@ -134,12 +124,7 @@ int main(){
     // deal with final scores... print from array.... function
 
     // close file remove semaphore game end???
-    remove_semaphore();
-    for (int i = 0; i<MAX_PLAYERS; i++){
-    char pipe_name[10];
-    snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
-    unlink(pipe_name);
-    }
+    delete_pipes();
 }
 
 /* Called in main whenever the host should ask another question.
@@ -183,7 +168,11 @@ void find_question(char * topic, char* question, char* answer) {
 	printf("question: %s\n", question);
 	char* a = strsep(&linepointer, "\n");
 
+  // should also deal with if tehre's nothing left
+
   strncpy(question,q,strlen(q));
   strncpy(answer,a,strlen(a)); // to be used up in main
+
+  // close file
 }
 
