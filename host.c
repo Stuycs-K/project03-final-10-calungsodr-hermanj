@@ -63,7 +63,7 @@ int main(){
     }
 
     printf("welcome, instructions here...\n");
-    printf("Player 1, please choose a topic (History, Geography, Math): ");
+    printf("Player %d, please choose a topic (History, Science, Math): ", 1); //1 is a place holder
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
 
@@ -152,16 +152,19 @@ void find_question(char * topic, char* question, char* answer) {
 		for (int i = 0; i <= histq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		histq_num++;
 	}
 	else if (strcmp(topic, "geography") == 0) {
 		for (int i = 0; i <= geoq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		geoq_num++;
 	}
 	else if (strcmp(topic, "math") == 0) {
 		for (int i = 0; i <= mathq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		mathq_num++;
 	}
 	char * linepointer = line;
 	char* q = strsep(&linepointer, ":");

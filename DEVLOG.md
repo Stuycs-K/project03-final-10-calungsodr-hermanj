@@ -25,6 +25,13 @@ files. Added signals for graceful exiting. Tested and cleaned up comments.
 Spent an hour at home writing the main function for the host file. Fixed
 up some signal handling.
 
+### 2024-01-09 - Logic and testing
+Spent 20 minutes with Joy in class testing and updating code to make sure
+we had the logic correct.
+
+Spent 40 minutes at home writing out comments/pseudocode for the player
+file, removed unnecessary semaphores
+
 
 
 # ------------------------------------------------- #
