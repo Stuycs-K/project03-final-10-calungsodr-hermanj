@@ -115,7 +115,7 @@ int main(){
 	char answerbuff[20];
 	char * answer;
 	answer = (char*) malloc(sizeof(answerbuff) + 1);
-	find_question(topic, answer);
+	answer = find_question(topic, answer);
 
 	//prompts the user for the answer
 	char useranswer[20];
