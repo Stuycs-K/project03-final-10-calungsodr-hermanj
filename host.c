@@ -28,6 +28,7 @@ int err(){
 static int histq_num;
 static int geoq_num;
 static int mathq_num;
+
 // !!!!!
 // UNCOMMENT WHEN DONEEEEEEE!!!!!
 // !!!!!
@@ -97,7 +98,7 @@ int main(){
     create_semaphore();
 
     printf("welcome, instructions here...\n");
-    printf("Player 1, please choose a topic (History, Science, Math): ");
+    printf("Player %d, please choose a topic (History, Science, Math): ", 1); //1 is a place holder
     char topic[20];
     fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
 
@@ -110,8 +111,34 @@ int main(){
 		}
 	}
 	
-    // get file_name by adding .txt to the end of chosen topic
-	find_question(topic);
+    // get file_name by adding .txt to the end of chosen topic and sets answer to the answer of that question
+	char answerbuff[20];
+	char * answer;
+	answer = (char*) malloc(sizeof(answerbuff) + 1);
+	find_question(topic, answer);
+
+	//prompts the user for the answer
+	char useranswer[20];
+	printf("Your answer: ");
+	fgets(useranswer, sizeof(useranswer), stdin);
+	
+	//get rid of \n
+	for (int i = 0; i < sizeof(useranswer); i++) {
+		if (useranswer[i] == '\n') {
+			useranswer[i] = '\0';
+			i = sizeof(useranswer);
+		}
+	}
+	printf("useranswer: %s\n", useranswer);
+	printf("correct answer: %s\n", answer);
+	
+	if (strcmp(answer, useranswer) == 0) {
+		printf("YOU HAVE THE RIGHT ANSWER\n");
+	}
+	else {
+		printf("INCORRECT, TRY AGAIN NEXT TIME\n");
+	}
+	
 
     // open file... use the method that joy is writing??
     // if file doesnt work, remove the semaphore and stop...
@@ -142,7 +169,7 @@ char* ask_question(int file_des, char* question){ //change later
 	return question;
 }
 
-void find_question(char * topic) {
+char* find_question(char * topic, char* answer) {
 	char topicbuff[20];
 	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
 	//printf("%s\n", topicbuff);
@@ -153,26 +180,29 @@ void find_question(char * topic) {
 	}
 	char line[1000];
 	char* question;
-	char* answer;
 	if (strcmp(topic, "history") == 0) {
 		for (int i = 0; i <= histq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		histq_num++;
 	}
 	else if (strcmp(topic, "geography") == 0) {
 		for (int i = 0; i <= geoq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		geoq_num++;
 	}
 	else if (strcmp(topic, "math") == 0) {
 		for (int i = 0; i <= mathq_num; i++) {
 			fgets(line, sizeof(line), readfile);
 		}
+		mathq_num++;
 	}
 	char * linepointer = line;
 	question = strsep(&linepointer, ":");
 	printf("question: %s\n", question);
 	answer = strsep(&linepointer, "\n");
 	printf("answer: %s\n", answer);
+	return answer;
 }
 

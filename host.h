@@ -18,6 +18,6 @@
 
 int main();
 char* ask_question(int file_des, char* question);
-void find_question(char* topic);
+char* find_question(char* topic, char* answer);
 
 #endif
