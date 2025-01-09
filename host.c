@@ -8,7 +8,7 @@ GAME HOST (main) should:
 1. Allow multiple players to join the game. (fork process) do we need server?
 2. Print an introduction and instructions for the players.
 3. Assign player numbers. First to join is player one, second is player 2, and so on...
-4. Print out a list of topics (ex. history, science, math) for player 1 to choose from. 
+4. Print out a list of topics (ex. history, science, math) for player 1 to choose from.
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
 6. Allow the players to take turns to enter in answers (with semaphores) until somebody's
@@ -25,6 +25,10 @@ int err(){
 }
 
 #define KEY 5849392
+static int histq_num;
+static int geoq_num;
+static int mathq_num;
+
 // !!!!!
 // UNCOMMENT WHEN DONEEEEEEE!!!!!
 // !!!!!
@@ -38,14 +42,14 @@ int err(){
 
 /* ---------- SEMAPHORE FOR ACCESS TO ANSWER ------------- */
 void create_semaphore(){
-    // create semaphore (blocks write access when it's not the right turn)
-    int semd = semget(KEY, 1, IPC_CREAT | 0600);
-    if (semd==-1) err();
+	// create semaphore (blocks write access when it's not the right turn)
+	int semd = semget(KEY, 1, IPC_CREAT | 0600);
+	if (semd==-1) err();
 
-    // initialize semaphore value to 1, making it availible
-    union semun us;
-    us.val = 1; // make us = 1 availible
-    semctl(semd, 0, SETVAL, us); // set the value to us... currently 1, meaning available!!
+	// initialize semaphore value to 1, making it availible
+	union semun us;
+	us.val = 1; // make us = 1 availible
+	semctl(semd, 0, SETVAL, us); // set the value to us... currently 1, meaning available!!
 }
 
 // Remove the shared memory and the semaphore
@@ -86,41 +90,69 @@ void unlock_semaphore(){
 
 // handles flow of the game, forking(?)
 int main(){
-    // create shared memory .,.. ?? initialize
-    // open file or something ehre.... ask question perhaps......
+	// create shared memory .,.. ?? initialize
 
-    // access!
-    create_semaphore();
+	// should create player pipes here as well..?
 
-    printf("welcome, instructions here...\n");
-    printf("Player 1, please choose a topic (History, Science, Math): ");
-    char topic[20];
-    fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow
+	// access!
+	create_semaphore();
 
-	//get rid of \n
+	printf("welcome, instructions here...\n");
+	printf("Player %d, please choose a topic (History, Science, Math): ", 1); //1 is a place holder
+	char topic[20];
+	fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
+
+	//get rid of \n and lowercase all
 	for (int i = 0; i < sizeof(topic); i++) {
+		topic[i] = tolower(topic[i]);
 		if (topic[i] == '\n') {
 			topic[i] = '\0';
 			i = sizeof(topic);
 		}
 	}
 	
-    // get file_name by adding .txt to the end of chosen topic
-	find_question(topic);
+	// get file_name by adding .txt to the end of chosen topic and sets answer to the answer of that question
+	char answerbuff[20];
+	char * answer;
+	answer = (char*) malloc(sizeof(answerbuff) + 1);
+	find_question(topic, answer);
 
-    // open file... use the method that joy is writing??
-    // if file doesnt work, remove the semaphore and stop...
+	//prompts the user for the answer
+	char useranswer[20];
+	printf("Your answer: ");
+	fgets(useranswer, sizeof(useranswer), stdin);
+	
+	//get rid of \n
+	for (int i = 0; i < sizeof(useranswer); i++) {
+		if (useranswer[i] == '\n') {
+			useranswer[i] = '\0';
+			i = sizeof(useranswer);
+		}
+	}
+	printf("useranswer: %s\n", useranswer);
+	printf("correct answer: %s\n", answer);
+	
+	if (strcmp(answer, useranswer) == 0) {
+		printf("YOU HAVE THE RIGHT ANSWER\n");
+	}
+	else {
+		printf("INCORRECT, TRY AGAIN NEXT TIME\n");
+	}
+	
 
-    while(1){
-      lock_semaphore();
-      // use ask_question method to print the question....
-      // if it ran out of questions, say that and then break the loop to end the game
+	// open file... use the method that joy is writing??
+	// if file doesnt work, remove the semaphore and stop...
 
-      // use pipes to communicate w the players </3
+	// fork a server for every player... have to figure out what to do with that
 
-      unlock_semaphore();
-    }
-    // close file remove semaphore game end???
+	while(1){
+	  lock_semaphore();
+	  // use ask_question method to print the question....
+	  // if it ran out of questions, say that and then break the loop to end the game
+
+	  unlock_semaphore();
+	}
+	// close file remove semaphore game end???
 	printf("Player %d, here's your next question: ", 1);
 	char buff[1000];
 	ask_question(1, buff); // 1 is a placeholder
@@ -132,12 +164,12 @@ int main(){
 and ask the corresponding question. */
 //copy the code for check_answer(char* answer)s
 char* ask_question(int file_des, char* question){ //change later
-    // question should be found by searching through the file with q_num as the number question
+	// question should be found by searching through the file with q_num as the number question
 	printf("%s\n", question);
 	return question;
 }
 
-void find_question(char * topic) {
+char* find_question(char * topic, char* answer) {
 	char topicbuff[20];
 	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
 	//printf("%s\n", topicbuff);
@@ -148,12 +180,29 @@ void find_question(char * topic) {
 	}
 	char line[1000];
 	char* question;
-	char* answer;
-	fgets(line, sizeof(line), readfile);
+	if (strcmp(topic, "history") == 0) {
+		for (int i = 0; i <= histq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+		histq_num++;
+	}
+	else if (strcmp(topic, "geography") == 0) {
+		for (int i = 0; i <= geoq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+		geoq_num++;
+	}
+	else if (strcmp(topic, "math") == 0) {
+		for (int i = 0; i <= mathq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+		mathq_num++;
+	}
 	char * linepointer = line;
 	question = strsep(&linepointer, ":");
 	printf("question: %s\n", question);
 	answer = strsep(&linepointer, "\n");
 	printf("answer: %s\n", answer);
+	return answer;
 }
 
