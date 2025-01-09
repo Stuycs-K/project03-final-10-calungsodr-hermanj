@@ -21,6 +21,10 @@ to the next question.
 
 */
 
+static int histq_num;
+static int geoq_num;
+static int mathq_num;
+
 // for pipe, look for sigpipe
 // SIGNAL HANDLING
 static void sighandler(int signo){
@@ -69,8 +73,9 @@ int main(){
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
 
-	// get rid of \n
+	//get rid of \n and lowercase all
 	for (int i = 0; i < sizeof(topic); i++) {
+		topic[i] = tolower(topic[i]);
 		if (topic[i] == '\n') {
 			topic[i] = '\0';
 			i = sizeof(topic);
@@ -109,7 +114,7 @@ int main(){
       if (pp == -1) err();
 
       char player_answer[500];
-      // ok so we have to make it so that the player pipe writing side will send in a stdin input??? i think ????
+      // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(pp,player_answer,sizeof(player_answer))>0){
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end game")==0){
@@ -158,13 +163,27 @@ void find_question(char * topic, char* question, char* answer) {
 	}
 
 	char line[1000];
-	fgets(line, sizeof(line), readfile);
-	char* linepointer = line;
+	if (strcmp(topic, "history") == 0) {
+		for (int i = 0; i <= histq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
+	else if (strcmp(topic, "geography") == 0) {
+		for (int i = 0; i <= geoq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
+	else if (strcmp(topic, "math") == 0) {
+		for (int i = 0; i <= mathq_num; i++) {
+			fgets(line, sizeof(line), readfile);
+		}
+	}
+	char * linepointer = line;
 	char* q = strsep(&linepointer, ":");
 	printf("question: %s\n", question);
 	char* a = strsep(&linepointer, "\n");
 
   strncpy(question,q,strlen(q));
-  strncpy(answer,a,strlen(q)); // to be used up in main
+  strncpy(answer,a,strlen(a)); // to be used up in main
 }
 
