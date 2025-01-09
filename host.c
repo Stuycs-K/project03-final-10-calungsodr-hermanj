@@ -1,7 +1,7 @@
 #include "host.h"
 #include "semaphore.h"
 
-#define MAX_PLAYERS 10 // ten players max can play
+#define MAX_PLAYERS 5 // ten players max can play
 
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
 
@@ -69,20 +69,19 @@ int main(){
 
     printf("welcome, instructions here...\n");
     printf("Player 1, please choose a topic (History, Geography, Math): ");
-
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
 
-	//get rid of \n and lowercase all
-	for (int i = 0; i < sizeof(topic); i++) {
-		topic[i] = tolower(topic[i]);
-		if (topic[i] == '\n') {
-			topic[i] = '\0';
-			i = sizeof(topic);
-		}
-	}
+    //get rid of \n and lowercase all
+    for (int i = 0; i < sizeof(topic); i++) {
+      topic[i] = tolower(topic[i]);
+      if (topic[i] == '\n') {
+        topic[i] = '\0';
+        i = sizeof(topic);
+      }
+    }
 
-    char question[500]; // or we can use.... malloc......
+    char question[500]; //change to malloc......
     char answer[500];
     int curr_player = 1;
     // deal with point system, initialize everyone's point system to 0 here
@@ -96,7 +95,7 @@ int main(){
 
       // if it ran out of questions, say that and then break the loop to end the game
       if(strlen(question)==0){
-        printf("No more questions! Game over.");
+        printf("No more questions! Game over."); // separate display points function
         break;
       }
 
@@ -119,11 +118,12 @@ int main(){
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end game")==0){
           printf("Player ended the game.\n");
-          break;
+          break; // point function
         }
         if (strcmp(player_answer,answer)==0){
           printf("Correct! Point added.");
           // add point........ look at array and just add not done yet
+          // handle lowercase
         }
         else printf("Wrong! The right answer is: %s",answer);
       }
@@ -131,7 +131,7 @@ int main(){
 
       curr_player = (curr_player%MAX_PLAYERS)+1; // so it wraps
     }
-    // deal with final scores... print from array
+    // deal with final scores... print from array.... function
 
     // close file remove semaphore game end???
     remove_semaphore();
