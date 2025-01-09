@@ -12,6 +12,11 @@
   struct seminfo  *__buf;
 };   */
 
+int err(){
+  printf("Error %d: %s\n", errno, strerror(errno));
+  exit(1);
+}
+
 /* ---------- SEMAPHORE FOR ACCESS TO ANSWER ------------- */
 void create_semaphore(){
     // create semaphore (blocks write access when it's not the right turn)

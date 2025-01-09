@@ -15,6 +15,7 @@
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
 
+int err();
 void create_semaphore();
 void remove_semaphore();
 void lock_semaphore();

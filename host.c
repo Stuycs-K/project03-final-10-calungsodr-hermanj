@@ -1,6 +1,8 @@
 #include "host.h"
 #include "semaphore.h"
 
+#define MAX_PLAYERS 10 // ten players max can play
+
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
 
 /*
@@ -24,17 +26,19 @@ to the next question.
 static void sighandler(int signo){
     if (signo == SIGINT){
       printf("\nDisconnected, game over");
+      remove_semaphore();
+      // to delete all pipe files
+      for (int i = 0; i<MAX_PLAYERS; i++){
+        char pipe_name[10];
+        snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
+        unlink(pipe_name);
+      }
       exit(0);
+      
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
     }
-}
-
-//prints errno
-int err(){
-  printf("Error %d: %s\n", errno, strerror(errno));
-  exit(1);
 }
 
 // handles flow of the game, forking(?)
@@ -49,11 +53,21 @@ int main(){
 
     // should create player pipes here as well..? not sure
     // array of pipes
+    for (int i = 0; i<MAX_PLAYERS; i++){
+      char pipe_name[10];
+      snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
+      int make = mkfifo(pipe_name, 0644);
+      if (make == -1){
+        perror("Cannot create player pipe.");
+        err();
+      }
+    }
 
     printf("welcome, instructions here...\n");
     printf("Player 1, please choose a topic (History, Geography, Math): ");
+
     char topic[20];
-    fgets(topic, sizeof(topic), stdin); // do we have to do that thing where we add '\0' to the end somehow. or remove new line i forgot what it was
+    fgets(topic, sizeof(topic), stdin);
 
 	// get rid of \n
 	for (int i = 0; i < sizeof(topic); i++) {
@@ -62,28 +76,65 @@ int main(){
 			i = sizeof(topic);
 		}
 	}
-	
-  // get file_name by adding .txt to the end of chosen topic
 
-    // open file... use the method that joy is writing??
-    // if file doesnt work, remove the semaphore and stop...
-
-    // fork a server for every player... have to figure out what to do with that
+    char question[500]; // or we can use.... malloc......
+    char answer[500];
+    int curr_player = 1;
+    // deal with point system, initialize everyone's point system to 0 here
+    // make an array of points?
 
     while(1){
       // loop through the pipes to speak to a specific one
       lock_semaphore();
-      find_question(topic);
-      // use ask_question method to print the question....
-      // if it ran out of questions, say that and then break the loop to end the game
 
+      find_question(topic, question, answer);
+
+      // if it ran out of questions, say that and then break the loop to end the game
+      if(strlen(question)==0){
+        printf("No more questions! Game over.");
+        break;
+      }
+
+      // blocks access
       unlock_semaphore();
+
+      // asks the next player the question
+      printf("Player %d, here's your question:\n%s\n", curr_player,question);
+
+      // open player pipe to read from them
+      char player_pipe[10];
+      snprintf(player_pipe,10,"player%d",curr_player); // players named "player1" "player2" and so on
+
+      int pp = open(player_pipe, O_RDONLY);
+      if (pp == -1) err();
+
+      char player_answer[500];
+      // ok so we have to make it so that the player pipe writing side will send in a stdin input??? i think ????
+      if(read(pp,player_answer,sizeof(player_answer))>0){
+        // remove trailing newline here i forgot how
+        if (strcmp(player_answer,"end game")==0){
+          printf("Player ended the game.\n");
+          break;
+        }
+        if (strcmp(player_answer,answer)==0){
+          printf("Correct! Point added.");
+          // add point........ look at array and just add not done yet
+        }
+        else printf("Wrong! The right answer is: %s",answer);
+      }
+      close(pp);
+
+      curr_player = (curr_player%MAX_PLAYERS)+1; // so it wraps
     }
+    // deal with final scores... print from array
+
     // close file remove semaphore game end???
-	printf("Player %d, here's your next question: ", 1);
-	char buff[1000];
-	ask_question(1, buff); // 1 is a placeholder
-	return 0;
+    remove_semaphore();
+    for (int i = 0; i<MAX_PLAYERS; i++){
+    char pipe_name[10];
+    snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
+    unlink(pipe_name);
+    }
 }
 
 /* Called in main whenever the host should ask another question.
@@ -96,7 +147,7 @@ char* ask_question(int file_des, char* question){ //change later
 	return question;
 }
 
-void find_question(char * topic) {
+void find_question(char * topic, char* question, char* answer) {
 	char topicbuff[20];
 	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
 	//printf("%s\n", topicbuff);
@@ -105,14 +156,15 @@ void find_question(char * topic) {
 	if (readfile == NULL) {
 		err();
 	}
+
 	char line[1000];
-	char* question;
-	char* answer;
 	fgets(line, sizeof(line), readfile);
-	char * linepointer = line;
-	question = strsep(&linepointer, ":");
+	char* linepointer = line;
+	char* q = strsep(&linepointer, ":");
 	printf("question: %s\n", question);
-	answer = strsep(&linepointer, "\n");
-	printf("answer: %s\n", answer);
+	char* a = strsep(&linepointer, "\n");
+
+  strncpy(question,q,strlen(q));
+  strncpy(answer,a,strlen(q)); // to be used up in main
 }
 
