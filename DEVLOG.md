@@ -38,3 +38,11 @@ on modifying headers for organization in the host file.
 
 Spent 50 minutes at home editing the host file to fit with my function
 to read and parse the file.
+
+### 2024-01-08 - reading from file and reading user input
+Spent 40 minutes in class working with Raechel to reorganize our work,
+tested with lab computer, merged our work together, started to work on
+reading the user's answer.
+
+Spent 50 minutes at home trying to get the function to return the string
+properly to check the user's answers.
