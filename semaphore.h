@@ -12,15 +12,13 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 
-#ifndef HOST_H
-#define HOST_H
+#ifndef SEMAPHORE_H
+#define SEMAPHORE_H
 
-#define histq_num 0
-#define geoq_num 0
-#define mathq_num 0
-
-int main();
-char* ask_question(int file_des, char* question);
-void find_question(char * topic, char* question, char* answer);
+int err();
+void create_semaphore();
+void remove_semaphore();
+void lock_semaphore();
+void unlock_semaphore();
 
 #endif
