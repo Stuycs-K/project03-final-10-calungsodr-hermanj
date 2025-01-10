@@ -1,31 +1,31 @@
 #include "player.h"
-
-int err(){
-	printf("errno %d\n",errno);
-	printf("%s\n",strerror(errno));
-	exit(1);
-}
+#include "host.h"
 
 int main() {
 	//prompts the user for the answer
 	
-	//connecting to WKP
-	int from_host;
-	from_host = open(WKP, O_WRONLY, 0666);
-	if (from_host < 0) {
-		printf("here line 93\n");
+	//making private pipe
+	int pid;
+	char name[10];
+	pid = getpid();
+	snprintf(name, 10, "player%d", pid);
+	if (mkfifo(name, 0666) < 0 ){
+		printf("private pipe couldn't be created\n");
 		err();
 	}
 	
-	//making private pipe
-	int pid = getpid();
-	int * pidp = &pid;
-	char name[10];
-	snprintf(name, 10, "%d", pid);
-	if (mkfifo(name, 0666) < 0 ){
-		printf("here line 103\n");
+	//connecting to WKP
+	int from_host;
+	from_host = open(WKP, O_RDONLY, 0666);
+	if (from_host < 0) {
+		printf("mario couldn't be opened\n");
 		err();
 	}
+	
+	//wrong code
+	//int *playernum;
+	//read(from_host, playernum, sizeof(int));
+	
 	
 	char * answer;
 	char useranswer[20];

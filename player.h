@@ -12,6 +12,6 @@
 
 #define WKP "mario"
 
-int err();
+int main();
     
 #endif
