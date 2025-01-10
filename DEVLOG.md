@@ -56,3 +56,9 @@ reading the user's answer.
 
 Spent 50 minutes at home trying to get the function to return the string
 properly to check the user's answers.
+
+### 2024-01-09 - Logic, testing, and pipes
+Spent 20 minutes with Raehcel explaining code, getting on the same page,
+and fixing merge conflicts.
+
+Spent 30 minutes at home adding pipes to the player files.
