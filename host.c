@@ -19,6 +19,12 @@ to the next question.
 
 */
 
+int err(){
+  printf("errno %d\n", errno);
+  printf("%s\n",strerror(errno));
+  exit(1);
+}
+
 static int histq_num = 0;
 static int geoq_num = 0;
 static int mathq_num = 0;
@@ -47,6 +53,15 @@ static void sighandler(int signo){
 // handles flow of the game, forking(?)
 int main(){
 
+    int from_client = 0;
+    // make WKP
+    if (mkfifo(WKP, 0644)==-1) err();
+
+    // open wkp.[blocks]
+    from_client = open(WKP, O_RDONLY);
+    if (from_client==-1) err();
+    printf("server setup done: created WKP, waiting for client\n");
+
     // for signals
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
@@ -58,7 +73,6 @@ int main(){
       int make = mkfifo(pipe_name, 0644);
       if (make == -1){
         perror("Cannot create player pipe.");
-        err();
       }
     }
 
@@ -101,6 +115,15 @@ int main(){
 
       int pp = open(player_pipe, O_RDONLY);
       if (pp == -1) err();
+
+      // tells the player pipe which number it is
+      // this is wrong, the player should tell it's pid, THEN the server will open a private pipe with that pid
+      char* player_num;
+      snprintf(player_num, 3, "%d", curr_player); 
+      int w = write(player_pipe, player_num, strlen(player_num)+1);
+      if (w==-1){
+        break;
+      }
 
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
