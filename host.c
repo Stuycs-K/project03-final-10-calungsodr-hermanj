@@ -1,5 +1,4 @@
 #include "host.h"
-#include "semaphore.h"
 
 #define MAX_PLAYERS 5 // ten players max can play
 
@@ -39,10 +38,15 @@ static int mathq_num;
 
 // for pipe, look for sigpipe
 // SIGNAL HANDLING
+int err(){
+	printf("errno %d\n",errno);
+	printf("%s\n",strerror(errno));
+	exit(1);
+}
+
 static void sighandler(int signo){
     if (signo == SIGINT){
       printf("\nDisconnected, game over");
-      remove_semaphore();
       // to delete all pipe files
       for (int i = 0; i<MAX_PLAYERS; i++){
         char pipe_name[10];
@@ -64,7 +68,6 @@ int main(){
     signal(SIGINT, sighandler);
 
     // get access!
-    create_semaphore();
 
     // should create player pipes here as well..? not sure
     // array of pipes
@@ -100,7 +103,6 @@ int main(){
 
     while(1){
       // loop through the pipes to speak to a specific one
-      lock_semaphore();
 
       find_question(topic, question, answer);
 
@@ -110,8 +112,6 @@ int main(){
         break;
       }
 
-      // blocks access
-      unlock_semaphore();
 
       // asks the next player the question
       printf("Player %d, here's your question:\n%s\n", curr_player,question);
@@ -145,7 +145,6 @@ int main(){
     // deal with final scores... print from array.... function
 
     // close file remove semaphore game end???
-    remove_semaphore();
     for (int i = 0; i<MAX_PLAYERS; i++){
     char pipe_name[10];
     snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
