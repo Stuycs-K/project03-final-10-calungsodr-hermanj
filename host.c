@@ -105,7 +105,7 @@ int main(){
         if(mkfifo(players[num_players].pipe_name, 0644)==-1){
           perror("cannot create player pipe");
         }
-        printf("Player %d joined with username (PID) %d\n", num_players+1, pid);
+        printf("Player %d joined!\n", num_players+1);
         num_players++;
       }
     }
@@ -114,7 +114,7 @@ int main(){
     unlink(WKP);
 
     printf("welcome, instructions here...\n");
-    printf("Player %d, please choose a topic (History, Science, Math): ", 1); //1 is a place holder
+    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
 
     char topic[20];
     fgets(topic, sizeof(topic), stdin);

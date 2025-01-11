@@ -8,4 +8,4 @@ host.o: host.c host.h
 player.o: player.c player.h
 	gcc -c player.c
 clean:
-	rm -f *.o game
+	rm -f *.o host player
