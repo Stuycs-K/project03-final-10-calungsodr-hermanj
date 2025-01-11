@@ -32,6 +32,15 @@ we had the logic correct.
 Spent 40 minutes at home writing out comments/pseudocode for the player
 file, removed unnecessary semaphores
 
+### 2024-01-10 - Rewriting host and player
+Spent 25 minutes testing and discussing new directions for our code in
+class. Adjusted
+
+Spent 2 hours at home rewriting code to fit new strategy (no semaphores,
+introduce structs, change the order of the code, base logic off of lab
+15's handshake). The setup now works correctly.
+
+
 
 
 # ------------------------------------------------- #
