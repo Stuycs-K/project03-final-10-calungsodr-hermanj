@@ -15,63 +15,51 @@ player_pipe it is? ex. "player1" "player2"
 
 */
 
-
-
-
-
 int main() {
 
 	//prompts the user for the answer
 	//connecting to WKP
+	char player_pipe[500];
+	char buffer[300];
 
-	int from_host;
-
-	// well known pipe sends the question
-	from_host = open(WKP, O_WRONLY, 0666);
-	if (from_host < 0) {
-		printf("here line 93\n");
-		err();
+	// send PID to WKP
+	int send_pid = open(WKP, O_WRONLY, 0666);
+	if (send_pid < 0) {
+		perror("error opening wkp");
 	}
 
 	//making private pipe
-
 	int pid = getpid();
-	int * pidp = &pid;
-	char name[10]; 
-	snprintf(name, 10, "%d", pid);
-	if (mkfifo(name, 0666) < 0 ){
-		printf("here line 103\n");
-		err();
+	sprintf(player_pipe, "player%d", pid); // do we still need this
+	sprintf(buffer, "%d", pid);
+
+	write(send_pid, buffer, strlen(buffer)+1);
+
+	printf("Player has joined the game!\n");
+
+	mkfifo(player_pipe, 0666);
+
+	int open_pp = open(player_pipe, O_RDONLY);
+	if (open_pp < 0){
+		perror("cant open player pipe");
 	}
 
-	char * answer;
-	char useranswer[20];
+	// wait for questions!
+	while (1){
+		if(read(open_pp,buffer,300)>0){
+			printf("Here's your question...%s\n", buffer);
 
-	printf("Your answer: ");
-	fgets(useranswer, sizeof(useranswer), stdin);
+			printf("Your answer: ");
+			fgets(buffer, sizeof(300), stdin);
 
-	//get rid of \n
-
-	for (int i = 0; i < sizeof(useranswer); i++) {
-		if (useranswer[i] == '\n') {
-			useranswer[i] = '\0';
-			i = sizeof(useranswer);
+			// senf user answer back to host
+			// handle it, make it all lowercase
+			int send_a = open(WKP, O_WRONLY);
+			write(send_a,buffer,strlen(buffer)+1);
+			close(send_a);
 		}
 	}
-
-	printf("useranswer: %s\n", useranswer);
-	printf("correct answer: %s\n", answer);
-
-	if (strcmp(answer, useranswer) == 0) {
-		printf("YOU HAVE THE RIGHT ANSWER\n");
-	}
-
-	else {
-		printf("INCORRECT, TRY AGAIN NEXT TIME\n");
-	}
-
-	return 0;
-
+	unlink(player_pipe);
 }
 
-// do we need this actually?
+// add exiting signals
