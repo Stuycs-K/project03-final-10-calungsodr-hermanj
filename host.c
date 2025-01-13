@@ -1,6 +1,7 @@
 #include "host.h"
 
 #define MAX_PLAYERS 3
+#define MAX_QUESTION 5;
 
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
 
@@ -130,14 +131,15 @@ int main(){
       }
     }
 
-    char question[500];
-    char answer[500];
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
 
     while(1){
       // loop through the pipes to speak to a specific one
+		
+		char question[500];
+		char answer[500];
       find_question(topic, question, answer);
 
       // if it ran out of questions, say that and then break the loop to end the game
