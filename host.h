@@ -16,6 +16,7 @@
 #ifndef HOST_H
 #define HOST_H
 
+int err();
 #define WKP "mario"
 
 int main();

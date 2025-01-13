@@ -10,7 +10,7 @@ GAME HOST (main) should:
 1. Allow multiple players to join the game. (fork process) do we need server?
 2. Print an introduction and instructions for the players.
 3. Assign player numbers. First to join is player one, second is player 2, and so on...
-4. Print out a list of topics (ex. history, science, math) for player 1 to choose from. 
+4. Print out a list of topics (ex. history, science, math) for player 1 to choose from.
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
 6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
@@ -18,7 +18,6 @@ to the next question.
 7. Keep asking questions until a user types "end game" or the Q&A file ends.
 
 */
-
 /*
 1/11 update to implement
 
@@ -48,18 +47,19 @@ struct player_struct players[MAX_PLAYERS]; //array of players!!!
 int num_players = 0;
 
 // is this correct????????
-struct player_struct create_player(int player_num){
+struct player_struct create_player(char* player_num){
 // use heap memory, so calloc or malloc
   struct player_struct p;
-  snprintf(p.pipe_name,10,"player%d",player_num); // use player index for pipe name
+  snprintf(p.pipe_name,20,"%s",player_num); // use player index for pipe name
   p.score = 0;
   return p;
 }
 
 void delete_pipes(){
-  unlink(WKP);
+  remove(WKP);
   for (int i = 0; i<num_players; i++){
-    unlink(players[i].pipe_name);
+	  printf("pipename: %s\n", players[i].pipe_name);
+    remove(players[i].pipe_name);
   }
 }
 
@@ -67,18 +67,19 @@ void delete_pipes(){
 // SIGNAL HANDLING
 static void sighandler(int signo){
     if (signo == SIGINT){
-      printf("\nDisconnected, game over");
+      printf("\nDisconnected, game over\n");
       delete_pipes();
       exit(0);
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
+		delete_pipes();
+		exit(0);
     }
 }
 
 // handles flow of the game, forking(?)
 int main(){
-
     // for signals
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
@@ -94,13 +95,13 @@ int main(){
     int from_client = open(WKP, O_RDONLY);
     if (from_client==-1) err();
 
-    char pid[10];
+    char pid[20];
     // for every player ! need the max to begin
     while (num_players<MAX_PLAYERS){
       // if there's something to read!
-      int player_pid = atoi(pid); // convert pid to integer, looked this up
+      //int player_pid = atoi(pid); // convert pid to integer, looked this up
       if (read(from_client,pid,sizeof(pid))>0){
-        players[num_players] = create_player(num_players);
+        players[num_players] = create_player(pid);
 
         if(mkfifo(players[num_players].pipe_name, 0644)==-1){
           perror("cannot create player pipe");
@@ -186,7 +187,6 @@ int main(){
       printf("Player %d: %d points\n", i+1, players[i].score);
     }
 
-    // close file remove semaphore game end???
     delete_pipes();
 }
 
@@ -195,12 +195,13 @@ int main(){
 and ask the corresponding question. */
 //copy the code for check_answer(char* answer)s
 char* ask_question(int file_des, char* question){ //change later
-    // question should be found by searching through the file with q_num as the number question
+	// question should be found by searching through the file with q_num as the number question
 	printf("%s\n", question);
 	return question;
 }
 
 void find_question(char * topic, char* question, char* answer) {
+
 	char topicbuff[20];
 	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
 	//printf("%s\n", topicbuff);
@@ -234,6 +235,7 @@ void find_question(char * topic, char* question, char* answer) {
   strncpy(question,q,strlen(q));
 	char* a = strsep(&linepointer, "\n");
   strncpy(question,a,strlen(a));
+	printf("question: %s\n", line);
 
   // should also deal with if tehre's nothing left
 
