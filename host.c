@@ -16,20 +16,26 @@ intended to place the current question and answer into shared memory.
 to the next question.
 7. Keep asking questions until a user types "end game" or the Q&A file ends.
 
-*/
-/*
 1/11 update to implement
-
 1. player sends the host its PID (which will be the pipe name)
 2. host adds each PID to an array that stores the pipe names
 3. the host loops through this array of pipes to know which pipe to send a question to
 */
 
-
-int err(){
-  printf("errno %d\n", errno);
-  printf("%s\n",strerror(errno));
-  exit(1);
+// for pipe, look for sigpipe
+// SIGNAL HANDLING
+static void sighandler(int signo){
+    if (signo == SIGINT){
+      printf("\nDisconnected, game over\n");
+      remove(WKP);
+      delete_pipes();
+      exit(0);
+    }
+    if (signo == SIGPIPE){
+      printf("\nDisconnected pipe.\n");
+		  delete_pipes();
+		  exit(0);
+    }
 }
 
 static int histq_num = 0;
@@ -42,7 +48,7 @@ struct player_struct {
   int score;
 };
 
-struct player_struct players[MAX_PLAYERS]; //array of players!!!
+struct player_struct players[MAX_PLAYERS]; // array of players!!!
 int num_players = 0;
 
 // is this correct????????
@@ -54,6 +60,15 @@ struct player_struct create_player(char* player_num){
   return p;
 }
 
+void print_points(){
+  printf("FINAL POINT COUNT:\n");
+    for (int i = 0; i<MAX_PLAYERS; i++){
+	  printf("Player %d: %d\n", i, players[i].score);
+
+    // possible add-on -- tell who the winner is
+  }
+}
+
 void delete_pipes(){
   unlink(WKP);
 	remove(WKP);
@@ -62,21 +77,6 @@ void delete_pipes(){
     unlink(players[i].pipe_name);
 	  remove(players[i].pipe_name);
   }
-}
-
-// for pipe, look for sigpipe
-// SIGNAL HANDLING
-static void sighandler(int signo){
-    if (signo == SIGINT){
-      printf("\nDisconnected, game over\n");
-      delete_pipes();
-      exit(0);
-    }
-    if (signo == SIGPIPE){
-      printf("\nDisconnected pipe.\n");
-		  delete_pipes();
-		  exit(0);
-    }
 }
 
 // handles flow of the game, forking(?)
@@ -94,7 +94,7 @@ int main(){
 
     // open wkp.[blocks]
     int from_client = open(WKP, O_RDONLY);
-    if (from_client==-1) err();
+    if (from_client==-1) perror("can't open WKP 1");
 
     char pid[20];
     // for every player ! need the max to begin
@@ -104,9 +104,7 @@ int main(){
       if (read(from_client,pid,sizeof(pid))>0){
         players[num_players] = create_player(pid);
 
-        if(mkfifo(players[num_players].pipe_name, 0644)==-1){
-          perror("cannot create player pipe");
-        }
+        mkfifo(players[num_players].pipe_name, 0644);
         printf("Player %d joined!\n", num_players+1);
         num_players++;
       }
@@ -143,6 +141,7 @@ int main(){
       // if it ran out of questions, say that and then break the loop to end the game
       if(strlen(question)==0){
         printf("No more questions! Game over."); // separate display points function
+        print_points();
         break;
       }
 
@@ -209,7 +208,7 @@ void find_question(char * topic, char* question, char* answer) {
 	FILE * readfile;
 	readfile = fopen(topicbuff, "r");
 	if (readfile == NULL) {
-		err();
+		perror("cannot open question file");
 	}
 
 	char line[1000];
