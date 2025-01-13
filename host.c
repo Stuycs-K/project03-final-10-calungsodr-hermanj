@@ -59,7 +59,7 @@ void delete_pipes(){
   unlink(WKP);
 	remove(WKP);
   for (int i = 0; i<num_players; i++){
-	  printf("pipename: %s\n", players[i].pipe_name);
+	  //printf("pipename: %s\n", players[i].pipe_name);
     unlink(players[i].pipe_name);
 	  remove(players[i].pipe_name);
   }
@@ -114,7 +114,6 @@ int main(){
     }
 
     close(from_client);
-    unlink(WKP);
 
     printf("welcome, instructions here...\n");
     printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
@@ -158,26 +157,29 @@ int main(){
       close(send_q);
 
       // no wait for answer...
-      int get_a = open(players[curr_player].pipe_name,O_RDONLY);
+      int get_a = open(WKP,O_RDONLY);
         if (get_a == -1){
-        perror("cannot open player pipe");
+        perror("cannot open WKP");
         break;
       }
 
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a,player_answer,sizeof(player_answer))>0){
+		  printf("received!: %s\n", player_answer);
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end game")==0){
           printf("Player ended the game.\n");
           break; // point function
         }
-        if (strcmp(player_answer,answer)==0){
+        else if (strcmp(player_answer,answer)==0){
           printf("Correct! Point added.");
           players[curr_player].score+=1;
           // handle lowercase, maybe in the part that actually gets it
         }
-        else printf("Wrong! The right answer is: %s",answer);
+		else {
+			printf("Wrong! The right answer is: %s",answer);
+		}
       }
       close(get_a);
 
