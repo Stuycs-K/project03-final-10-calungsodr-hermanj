@@ -11,7 +11,5 @@
 #define PLAYER_H
 
 #define WKP "mario"
-
-int main();
     
 #endif

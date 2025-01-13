@@ -1,15 +1,12 @@
-compile: game
-host: hosts
-	./hosts
-player: playerss
-	./players
-hosts: host.o
-	gcc -o hosts host.o
-playerss: player.o
-	gcc -o players player.o
-player.o: player.c player.h
-	gcc -c player.c
+compile: host player
+host: host.o 
+	gcc -o host host.o 
+player: player.o 
+	gcc -o player player.o 
 host.o: host.c host.h
 	gcc -c host.c
+player.o: player.c player.h
+	gcc -c player.c
+>>>>>>> main
 clean:
-	rm -f *.o game
+	rm -f *.o host player

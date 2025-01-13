@@ -25,6 +25,22 @@ files. Added signals for graceful exiting. Tested and cleaned up comments.
 Spent an hour at home writing the main function for the host file. Fixed
 up some signal handling.
 
+### 2024-01-09 - Logic and testing
+Spent 20 minutes with Joy in class testing and updating code to make sure
+we had the logic correct.
+
+Spent 40 minutes at home writing out comments/pseudocode for the player
+file, removed unnecessary semaphores
+
+### 2024-01-10 - Rewriting host and player
+Spent 25 minutes testing and discussing new directions for our code in
+class. Adjusted
+
+Spent 2 hours at home rewriting code to fit new strategy (no semaphores,
+introduce structs, change the order of the code, base logic off of lab
+15's handshake). The setup now works correctly.
+
+
 
 
 # ------------------------------------------------- #
@@ -49,3 +65,9 @@ reading the user's answer.
 
 Spent 50 minutes at home trying to get the function to return the string
 properly to check the user's answers.
+
+### 2024-01-09 - Logic, testing, and pipes
+Spent 20 minutes with Raehcel explaining code, getting on the same page,
+and fixing merge conflicts.
+
+Spent 30 minutes at home adding pipes to the player files.

@@ -17,8 +17,10 @@
 #define HOST_H
 
 int err();
+#define WKP "mario"
+
 int main();
 char* ask_question(int file_des, char* question);
-void find_question(char * topic, char* question, char* answer);
+void find_question(char *topic, char *question, char *answer);
 
 #endif

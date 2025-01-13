@@ -1,6 +1,6 @@
 #include "host.h"
 
-#define MAX_PLAYERS 5 // ten players max can play
+#define MAX_PLAYERS 3
 
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
 
@@ -13,28 +13,54 @@ GAME HOST (main) should:
 4. Print out a list of topics (ex. history, science, math) for player 1 to choose from.
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
-6. Allow the players to take turns to enter in answers (with semaphores) until somebody's
-response matches the current stored answer. Add one point to that player, then move on
+6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
 to the next question.
 7. Keep asking questions until a user types "end game" or the Q&A file ends.
 
 */
+/*
+1/11 update to implement
+
+1. player sends the host its PID (which will be the pipe name)
+2. host adds each PID to an array that stores the pipe names
+3. the host loops through this array of pipes to know which pipe to send a question to
+*/
 
 
-static int histq_num;
-static int geoq_num;
-static int mathq_num;
+int err(){
+  printf("errno %d\n", errno);
+  printf("%s\n",strerror(errno));
+  exit(1);
+}
 
-// !!!!!
-// UNCOMMENT WHEN DONEEEEEEE!!!!!
-// !!!!!
-// required, might have issues w mac i forgot yea it does
-/*union semun {
-  int val;                  //used for SETVAL
-  struct semid_ds *buf;     //used for IPC_STAT and IPC_SET
-  unsigned short  *array;   //used for SETALL
-  struct seminfo  *__buf;
-};   */
+static int histq_num = 0;
+static int geoq_num = 0;
+static int mathq_num = 0;
+
+struct player_struct {
+  int pid;
+  char pipe_name[20];
+  int score;
+};
+
+struct player_struct players[MAX_PLAYERS]; //array of players!!!
+int num_players = 0;
+
+// is this correct????????
+struct player_struct create_player(int player_num){
+// use heap memory, so calloc or malloc
+  struct player_struct p;
+  snprintf(p.pipe_name,10,"player%d",player_num); // use player index for pipe name
+  p.score = 0;
+  return p;
+}
+
+void delete_pipes(){
+  unlink(WKP);
+  for (int i = 0; i<num_players; i++){
+    unlink(players[i].pipe_name);
+  }
+}
 
 // for pipe, look for sigpipe
 // SIGNAL HANDLING
@@ -47,14 +73,8 @@ int err(){
 static void sighandler(int signo){
     if (signo == SIGINT){
       printf("\nDisconnected, game over");
-      // to delete all pipe files
-      for (int i = 0; i<MAX_PLAYERS; i++){
-        char pipe_name[10];
-        snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
-        unlink(pipe_name);
-      }
+      delete_pipes();
       exit(0);
-      
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
@@ -67,22 +87,39 @@ int main(){
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
 
-    // get access!
+    // make WKP
+    if (mkfifo(WKP, 0644)==-1) {
+      perror("error in making WKP");
+    }
 
-    // should create player pipes here as well..? not sure
-    // array of pipes
-    for (int i = 0; i<MAX_PLAYERS; i++){
-      char pipe_name[10];
-      snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
-      int make = mkfifo(pipe_name, 0644);
-      if (make == -1){
-        perror("Cannot create player pipe.");
-        err();
+    printf("Server setup finished, waiting for %d players to join! (Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
+
+    // open wkp.[blocks]
+    int from_client = open(WKP, O_RDONLY);
+    if (from_client==-1) err();
+
+    char pid[10];
+    // for every player ! need the max to begin
+    while (num_players<MAX_PLAYERS){
+      // if there's something to read!
+      int player_pid = atoi(pid); // convert pid to integer, looked this up
+      if (read(from_client,pid,sizeof(pid))>0){
+        players[num_players] = create_player(num_players);
+
+        if(mkfifo(players[num_players].pipe_name, 0644)==-1){
+          perror("cannot create player pipe");
+        }
+        printf("Player %d joined!\n", num_players+1);
+        num_players++;
       }
     }
 
+    close(from_client);
+    unlink(WKP);
+
     printf("welcome, instructions here...\n");
-    printf("Player %d, please choose a topic (History, Science, Math): ", 1); //1 is a place holder
+    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
+
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
 
@@ -95,15 +132,14 @@ int main(){
       }
     }
 
-    char question[500]; //change to malloc......
+    char question[500];
     char answer[500];
-    int curr_player = 1;
+    int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
 
     while(1){
       // loop through the pipes to speak to a specific one
-
       find_question(topic, question, answer);
 
       // if it ran out of questions, say that and then break the loop to end the game
@@ -113,19 +149,25 @@ int main(){
       }
 
 
-      // asks the next player the question
-      printf("Player %d, here's your question:\n%s\n", curr_player,question);
+      // send question to player through pipe!
+      int send_q = open(players[curr_player].pipe_name,O_WRONLY);
+      if (send_q == -1){
+        perror("cannot open player pipe");
+        break;
+      }
+      write(send_q,question,strlen(question+1));
+      close(send_q);
 
-      // open player pipe to read from them
-      char player_pipe[10];
-      snprintf(player_pipe,10,"player%d",curr_player); // players named "player1" "player2" and so on
-
-      int pp = open(player_pipe, O_RDONLY);
-      if (pp == -1) err();
+      // no wait for answer...
+      int get_a = open(players[curr_player].pipe_name,O_RDONLY);
+        if (get_a == -1){
+        perror("cannot open player pipe");
+        break;
+      }
 
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
-      if(read(pp,player_answer,sizeof(player_answer))>0){
+      if(read(get_a,player_answer,sizeof(player_answer))>0){
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end game")==0){
           printf("Player ended the game.\n");
@@ -133,23 +175,22 @@ int main(){
         }
         if (strcmp(player_answer,answer)==0){
           printf("Correct! Point added.");
-          // add point........ look at array and just add not done yet
-          // handle lowercase
+          players[curr_player].score+=1;
+          // handle lowercase, maybe in the part that actually gets it
         }
         else printf("Wrong! The right answer is: %s",answer);
       }
-      close(pp);
+      close(get_a);
 
-      curr_player = (curr_player%MAX_PLAYERS)+1; // so it wraps
+      curr_player = (curr_player+1)%num_players; // so it wraps
     }
+
     // deal with final scores... print from array.... function
-
-    // close file remove semaphore game end???
-    for (int i = 0; i<MAX_PLAYERS; i++){
-    char pipe_name[10];
-    snprintf(pipe_name,10,"player%d",i+1); // players named "player1" "player2" and so on
-    unlink(pipe_name);
+    for (int i = 0; i<num_players; i++){
+      printf("Player %d: %d points\n", i+1, players[i].score);
     }
+
+    delete_pipes();
 }
 
 /* Called in main whenever the host should ask another question.
@@ -194,10 +235,14 @@ void find_question(char * topic, char* question, char* answer) {
 	}
 	char * linepointer = line;
 	char* q = strsep(&linepointer, ":");
-	printf("question: %s\n", question);
-	char* a = strsep(&linepointer, "\n");
-
   strncpy(question,q,strlen(q));
-  strncpy(answer,a,strlen(a)); // to be used up in main
+	char* a = strsep(&linepointer, "\n");
+  strncpy(question,a,strlen(a));
+
+  // should also deal with if tehre's nothing left
+
+  fclose(readfile);
+
+  // close file
 }
 
