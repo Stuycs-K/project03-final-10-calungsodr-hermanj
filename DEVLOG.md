@@ -71,3 +71,10 @@ Spent 20 minutes with Raehcel explaining code, getting on the same page,
 and fixing merge conflicts.
 
 Spent 30 minutes at home adding pipes to the player files.
+
+### 2024-01-10 - merging
+Spent class time merging and planning on weekend work
+
+### 2024-01-13 - pipes
+Spent an hour of consecutive frees making the pipes connect properly,
+making sure the host and player are on the same page.
