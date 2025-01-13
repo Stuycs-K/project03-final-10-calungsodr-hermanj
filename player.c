@@ -128,6 +128,7 @@ int main() {
 		}
 	}
 	unlink(player_pipe);
+	remove(player_pipe);
 }
 
 // add exiting signals

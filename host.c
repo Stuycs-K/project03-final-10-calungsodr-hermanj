@@ -59,6 +59,7 @@ void delete_pipes(){
   remove(WKP);
   for (int i = 0; i<num_players; i++){
 	  printf("pipename: %s\n", players[i].pipe_name);
+    unlink(players[i].pipe_name);
     remove(players[i].pipe_name);
   }
 }
@@ -73,8 +74,8 @@ static void sighandler(int signo){
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
-		delete_pipes();
-		exit(0);
+		  delete_pipes();
+		  exit(0);
     }
 }
 
@@ -240,7 +241,5 @@ void find_question(char * topic, char* question, char* answer) {
   // should also deal with if tehre's nothing left
 
   fclose(readfile);
-
-  // close file
 }
 
