@@ -47,37 +47,34 @@ struct player_struct players[MAX_PLAYERS]; //array of players!!!
 int num_players = 0;
 
 // is this correct????????
-struct player_struct create_player(int player_num){
+struct player_struct create_player(char* player_num){
 // use heap memory, so calloc or malloc
   struct player_struct p;
-  snprintf(p.pipe_name,10,"player%d",player_num); // use player index for pipe name
+  snprintf(p.pipe_name,20,"%s",player_num); // use player index for pipe name
   p.score = 0;
   return p;
 }
 
 void delete_pipes(){
-  unlink(WKP);
+  remove(WKP);
   for (int i = 0; i<num_players; i++){
-    unlink(players[i].pipe_name);
+	  printf("pipename: %s\n", players[i].pipe_name);
+    remove(players[i].pipe_name);
   }
 }
 
 // for pipe, look for sigpipe
 // SIGNAL HANDLING
-int err(){
-	printf("errno %d\n",errno);
-	printf("%s\n",strerror(errno));
-	exit(1);
-}
-
 static void sighandler(int signo){
     if (signo == SIGINT){
-      printf("\nDisconnected, game over");
+      printf("\nDisconnected, game over\n");
       delete_pipes();
       exit(0);
     }
     if (signo == SIGPIPE){
       printf("\nDisconnected pipe.\n");
+		delete_pipes();
+		exit(0);
     }
 }
 
@@ -98,13 +95,13 @@ int main(){
     int from_client = open(WKP, O_RDONLY);
     if (from_client==-1) err();
 
-    char pid[10];
+    char pid[20];
     // for every player ! need the max to begin
     while (num_players<MAX_PLAYERS){
       // if there's something to read!
-      int player_pid = atoi(pid); // convert pid to integer, looked this up
+      //int player_pid = atoi(pid); // convert pid to integer, looked this up
       if (read(from_client,pid,sizeof(pid))>0){
-        players[num_players] = create_player(num_players);
+        players[num_players] = create_player(pid);
 
         if(mkfifo(players[num_players].pipe_name, 0644)==-1){
           perror("cannot create player pipe");
@@ -238,6 +235,7 @@ void find_question(char * topic, char* question, char* answer) {
   strncpy(question,q,strlen(q));
 	char* a = strsep(&linepointer, "\n");
   strncpy(question,a,strlen(a));
+	printf("question: %s\n", line);
 
   // should also deal with if tehre's nothing left
 

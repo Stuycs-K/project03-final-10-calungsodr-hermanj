@@ -7,6 +7,5 @@ host.o: host.c host.h
 	gcc -c host.c
 player.o: player.c player.h
 	gcc -c player.c
->>>>>>> main
 clean:
 	rm -f *.o host player

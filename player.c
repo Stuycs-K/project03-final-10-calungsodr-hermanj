@@ -95,11 +95,11 @@ int main() {
 	sprintf(player_pipe, "player%d", pid); // do we still need this
 	sprintf(buffer, "%d", pid);
 
-	write(send_pid, buffer, strlen(buffer)+1);
+	mkfifo(player_pipe, 0666);
+	
+	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
 	printf("Player has joined the game!\n");
-
-	mkfifo(player_pipe, 0666);
 
 	int open_pp = open(player_pipe, O_RDONLY);
 	if (open_pp < 0){
@@ -108,7 +108,7 @@ int main() {
 
 	// wait for questions!
 	while (1){
-		if(read(open_pp,buffer,300)>0){
+		if(read(open_pp,buffer,300)>0){ //why does nothing get sent????
 			printf("Here's your question...%s\n", buffer);
 
 			printf("Your answer: ");
