@@ -56,10 +56,12 @@ struct player_struct create_player(char* player_num){
 }
 
 void delete_pipes(){
-  remove(WKP);
+  unlink(WKP);
+	remove(WKP);
   for (int i = 0; i<num_players; i++){
 	  printf("pipename: %s\n", players[i].pipe_name);
-    remove(players[i].pipe_name);
+    unlink(players[i].pipe_name);
+	  remove(players[i].pipe_name);
   }
 }
 
@@ -234,9 +236,7 @@ void find_question(char * topic, char* question, char* answer) {
 	char* q = strsep(&linepointer, ":");
   strncpy(question,q,strlen(q));
 	char* a = strsep(&linepointer, "\n");
-  strncpy(question,a,strlen(a));
-	printf("question: %s\n", line);
-
+  strncpy(answer,a,strlen(a));
   // should also deal with if tehre's nothing left
 
   fclose(readfile);
