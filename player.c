@@ -1,9 +1,14 @@
 #include "player.h"
 
 // for pipe, look for sigpipe
+// for pipe, look for sigpipe
 static void sighandler(int signo){
-    if (signo == SIGINT || signo == SIGPIPE){
-        printf("Disconnected.\n");
+    if (signo == SIGINT){
+        printf("\nDisconnected.\n");
+        exit(0);
+    }
+    if (signo == SIGPIPE){
+        printf("\nDisconnected.\n");
         exit(0);
     }
 }
@@ -25,7 +30,8 @@ player_pipe it is? ex. "player1" "player2"
 
 int main() {
 
-	signal(SIGPIPE, sighandler);
+    signal(SIGPIPE, sighandler);
+    signal(SIGINT, sighandler);
 
 	//prompts the user for the answer
 	//connecting to WKP
