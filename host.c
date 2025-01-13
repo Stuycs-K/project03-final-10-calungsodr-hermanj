@@ -10,7 +10,6 @@ GAME HOST (main) should:
 1. Allow multiple players to join the game. (fork process) do we need server?
 2. Print an introduction and instructions for the players.
 3. Assign player numbers. First to join is player one, second is player 2, and so on...
-4. Print out a list of topics (ex. history, science, math) for player 1 to choose from.
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
 6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
@@ -56,11 +55,12 @@ struct player_struct create_player(char* player_num){
 }
 
 void delete_pipes(){
-  remove(WKP);
+  unlink(WKP);
+	remove(WKP);
   for (int i = 0; i<num_players; i++){
 	  printf("pipename: %s\n", players[i].pipe_name);
     unlink(players[i].pipe_name);
-    remove(players[i].pipe_name);
+	  remove(players[i].pipe_name);
   }
 }
 
@@ -235,9 +235,7 @@ void find_question(char * topic, char* question, char* answer) {
 	char* q = strsep(&linepointer, ":");
   strncpy(question,q,strlen(q));
 	char* a = strsep(&linepointer, "\n");
-  strncpy(question,a,strlen(a));
-	printf("question: %s\n", line);
-
+  strncpy(answer,a,strlen(a));
   // should also deal with if tehre's nothing left
 
   fclose(readfile);
