@@ -114,6 +114,15 @@ int main() {
 			printf("Your answer: ");
 			fgets(buffer, sizeof(300), stdin);
 
+			//get rid of \n and lowercase all
+			for (int i = 0; i < sizeof(buffer); i++) {
+			  buffer[i] = tolower(buffer[i]);
+			  if (buffer[i] == '\n') {
+				buffer[i] = '\0';
+				i = sizeof(buffer);
+			  }
+			}
+			
 			// senf user answer back to host
 			// handle it, make it all lowercase
 			int send_a = open(WKP, O_WRONLY);
