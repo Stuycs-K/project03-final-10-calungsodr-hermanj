@@ -25,20 +25,20 @@ int main() {
 	//prompts the user for the answer
 	//connecting to WKP
 	char player_pipe[500];
-	char buffer[300];
+		char buffer[500];
 
 	// send PID to WKP
-	int send_pid = open(WKP, O_WRONLY, 0666);
+	int send_pid = open(WKP, O_WRONLY);
 	if (send_pid < 0) {
 		perror("error opening wkp");
 	}
 
 	//making private pipe
 	int pid = getpid();
-	sprintf(player_pipe, "player%d", pid); // do we still need this
+	sprintf(player_pipe, "player%d", pid); 
 	sprintf(buffer, "%d", pid);
 
-	mkfifo(player_pipe, 0666);
+	mkfifo(player_pipe, 0666); // err
 	
 	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
@@ -51,22 +51,32 @@ int main() {
 
 	// wait for questions!
 	while (1){
-		memset(buffer, 0, sizeof(buffer)); // looked up, clear before start
-		if(read(open_pp,buffer,300)>0){
-			printf("Here's your question...%s\n", buffer);
+			char q_buff[300];
+			char a_buff[300];
+			char correct_a[300];
+			memset(correct_a, 0, sizeof(correct_a));
+			memset(q_buff, 0, sizeof(q_buff)); // looked up, clear before start
+			memset(a_buff, 0, sizeof(a_buff));
+			read(open_pp,q_buff,sizeof(q_buff)); //get question from host
+			printf("sample question: %s\n", q_buff);
+			read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
+			printf("sample answer: %s\n", correct_a);
+			printf("Here's your question...%s\n", q_buff);
 
 			printf("Your answer: ");
-			memset(buffer, 0, sizeof(buffer));
-			fgets(buffer, sizeof(300), stdin);
-			buffer[strcspn(buffer, "\n")] = '\0';
+			fgets(a_buff, sizeof(300), stdin);
+			a_buff[strcspn(a_buff, "\n")] = '\0';
 
-			// send user answer back to host
-
-			// handle it, make it all lowercase
+			// checks if its correct or not
+			if (strcmp(a_buff, correct_a) == 0) {
+					printf("Correct! Point added.\n");
+			}
+			else {
+					printf("Wrong! The right answer is: %s\n",correct_a);
+			}
 			int send_a = open(player_pipe, O_WRONLY);
-			write(send_a,buffer,strlen(buffer)+1);
+			write(send_a,a_buff,strlen(a_buff)+1);
 			close(send_a);
-		}
 	}
 	unlink(player_pipe);
 	remove(player_pipe);
