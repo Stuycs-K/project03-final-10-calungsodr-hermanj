@@ -76,7 +76,6 @@ int main() {
 
 					printf("Your answer: ");
 					fgets(a_buff, sizeof(a_buff), stdin);
-					printf("you answered... %s\n", a_buff);
 					a_buff[strcspn(a_buff, "\n")] = '\0';
 
 					// checks if its correct or not
