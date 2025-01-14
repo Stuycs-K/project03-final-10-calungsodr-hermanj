@@ -28,17 +28,17 @@ int main() {
 	char buffer[300];
 
 	// send PID to WKP
-	int send_pid = open(WKP, O_WRONLY, 0666);
+	int send_pid = open(WKP, O_WRONLY);
 	if (send_pid < 0) {
 		perror("error opening wkp");
 	}
 
 	//making private pipe
 	int pid = getpid();
-	sprintf(player_pipe, "player%d", pid); // do we still need this
+	sprintf(player_pipe, "player%d", pid); 
 	sprintf(buffer, "%d", pid);
 
-	mkfifo(player_pipe, 0666);
+	mkfifo(player_pipe, 0666); // err
 	
 	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
@@ -52,7 +52,7 @@ int main() {
 	// wait for questions!
 	while (1){
 		memset(buffer, 0, sizeof(buffer)); // looked up, clear before start
-		if(read(open_pp,buffer,300)>0){
+		if(read(open_pp,buffer,sizeof(buffer))>0){
 			printf("Here's your question...%s\n", buffer);
 
 			printf("Your answer: ");

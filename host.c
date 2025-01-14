@@ -38,10 +38,6 @@ static void sighandler(int signo){
     }
 }
 
-static int histq_num = 0;
-static int geoq_num = 0;
-static int mathq_num = 0;
-
 struct player_struct {
   int pid;
   char pipe_name[20];
@@ -50,8 +46,10 @@ struct player_struct {
 
 struct player_struct players[MAX_PLAYERS]; // array of players!!!
 int num_players = 0;
+static int histq_num = 0;
+static int geoq_num = 0;
+static int mathq_num = 0;
 
-// is this correct????????
 struct player_struct create_player(char* player_num){
 // use heap memory, so calloc or malloc
   struct player_struct p;
@@ -85,7 +83,7 @@ int main(){
     signal(SIGINT, sighandler);
 
     // make WKP
-    if (mkfifo(WKP, 0644)==-1) {
+    if (mkfifo(WKP, 0644)<0) {
       perror("error in making WKP");
     }
 
@@ -95,12 +93,12 @@ int main(){
     int from_client = open(WKP, O_RDONLY);
     if (from_client==-1) perror("can't open WKP 1");
 
-    char pid[20];
+    char player_pipe[20];
     // for every player ! need the max to begin
     while (num_players<MAX_PLAYERS){
       // if there's something to read!
-      if (read(from_client,pid,sizeof(pid))>0){
-        players[num_players] = create_player(pid);
+      if (read(from_client,player_pipe,sizeof(player_pipe))>0){
+        players[num_players] = create_player(player_pipe);
 
         mkfifo(players[num_players].pipe_name, 0644);
         printf("Player %d joined!\n", num_players+1);
@@ -146,7 +144,7 @@ int main(){
 
       // send question to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
-      if (send_q == -1){
+      if (send_q < 0){
         perror("cannot open player pipe");
         break;
       }
@@ -155,7 +153,7 @@ int main(){
 
       // no wait for answer...
       int get_a = open(players[curr_player].pipe_name,O_RDONLY);
-        if (get_a == -1){
+        if (get_a < 0){
         perror("cannot open player pipe");
         break;
       }
@@ -172,7 +170,6 @@ int main(){
         if (strcmp(player_answer,answer)==0){
           printf("Correct! Point added.");
           players[curr_player].score+=1;
-          // handle lowercase, maybe in the part that actually gets it
         }
         else printf("Wrong! The right answer is: %s",answer);
       }
