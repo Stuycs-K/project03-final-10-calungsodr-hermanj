@@ -68,12 +68,16 @@ void print_points(){
 }
 
 void delete_pipes(){
-  unlink(WKP);
-	remove(WKP);
   for (int i = 0; i<num_players; i++){
-	  //printf("pipename: %s\n", players[i].pipe_name);
+			int pp = open(players[i].pipe_name, O_WRONLY);
+	  //sends a message so the players disconnect
+			printf("im deleting pipes\n");
+			char end[100] = "end";
+			write(pp, end, sizeof(end));
     unlink(players[i].pipe_name);
 	  remove(players[i].pipe_name);
+			unlink(WKP);
+			remove(WKP);
   }
 }
 
@@ -130,7 +134,6 @@ int main(){
 
     while(1){
       // loop through the pipes to speak to a specific one
-		
 		char question[500];
 		char answer[500];
 				memset(question, 0, sizeof(question));
@@ -142,16 +145,21 @@ int main(){
       if(strlen(question)==0){
         printf("No more questions! Game over."); // separate display points function
         print_points();
+					delete_pipes();
         break;
       }
-
 
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
+					delete_pipes();
         perror("cannot open player pipe");
         break;
       }
+				//game is still going
+				char game[100] = "go";
+				write(send_q, game, sizeof(game));
+				
       write(send_q,question,strlen(question)+1);
 				printf("question: %s\n", question);
 				write(send_q,answer, strlen(answer) + 1);
@@ -161,6 +169,7 @@ int main(){
       // no wait for answer...
       int get_a = open(players[curr_player].pipe_name,O_RDONLY);
         if (get_a < 0){
+						delete_pipes();
         perror("cannot open player pipe");
         break;
       }
