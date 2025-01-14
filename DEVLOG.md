@@ -94,6 +94,8 @@ Spent 40 minutes at home trying to figure out how our code broke, added print
 statements to find where the piping messed up, changed a bit of the player.c 
 so that the player know if they got the question right or wrong.
 
-### 2024-01-14 - game end
+### 2024-01-14 - game end and looping
 Spent an hour of consecutive frees fixing the loops and trying to get the player to
 exit when the host exits.
+
+Spent class time identifying issues and distributing tasks to finish
