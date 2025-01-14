@@ -150,7 +150,7 @@ int main(){
         perror("cannot open player pipe");
         break;
       }
-      write(send_q,question,strlen(question+1));
+      write(send_q,question,strlen(question)+1);
       close(send_q);
 
       // no wait for answer...
@@ -163,6 +163,7 @@ int main(){
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a,player_answer,sizeof(player_answer))>0){
+        player_answer[strcspn(player_answer, "\n")] = '\0';
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end game")==0){
           printf("Player ended the game.\n");
@@ -181,6 +182,7 @@ int main(){
     }
     print_points();
     delete_pipes();
+    exit(0);
 }
 
 /* Called in main whenever the host should ask another question.

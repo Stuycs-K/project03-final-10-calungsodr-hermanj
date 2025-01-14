@@ -51,21 +51,26 @@ int main() {
 
 	// wait for questions!
 	while (1){
+		memset(buffer, 0, sizeof(buffer)); // looked up, clear before start
 		if(read(open_pp,buffer,300)>0){
 			printf("Here's your question...%s\n", buffer);
 
 			printf("Your answer: ");
+			memset(buffer, 0, sizeof(buffer));
 			fgets(buffer, sizeof(300), stdin);
+			buffer[strcspn(buffer, "\n")] = '\0';
+
 
 			// send user answer back to host
 			// handle it, make it all lowercase
-			int send_a = open(WKP, O_WRONLY);
+			int send_a = open(player_pipe, O_WRONLY);
 			write(send_a,buffer,strlen(buffer)+1);
 			close(send_a);
 		}
 	}
 	unlink(player_pipe);
 	remove(player_pipe);
+	exit(0);
 }
 
 // add exiting signals
