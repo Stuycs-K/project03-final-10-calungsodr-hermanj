@@ -47,6 +47,9 @@ the point system printer.
 Spent 30 minutes at home fixing some signal handling and other errors,
 fixing some of the question cycling process.
 
+### 2024-01-14 - Resolving issues
+Spent 40 minutes finding and fixing issues with Joy. Fixed question
+loop error and figured out exiting with a typed "end" command.
 
 
 
