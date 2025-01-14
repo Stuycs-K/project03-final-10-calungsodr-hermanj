@@ -44,13 +44,15 @@ int main() {
 
 	printf("Player has joined the game!\n");
 
-	int open_pp = open(player_pipe, O_RDONLY);
-	if (open_pp < 0){
-		perror("cant open player pipe");
-	}
 
 	// wait for questions!
 	while (1){
+			//open private pipe to read question and answer
+			int open_pp = open(player_pipe, O_RDONLY);
+			if (open_pp < 0){
+				perror("cant open player pipe");
+			}
+			
 			char q_buff[300];
 			char a_buff[300];
 			char correct_a[300];
@@ -58,9 +60,10 @@ int main() {
 			memset(q_buff, 0, sizeof(q_buff)); // looked up, clear before start
 			memset(a_buff, 0, sizeof(a_buff));
 			read(open_pp,q_buff,sizeof(q_buff)); //get question from host
-			printf("sample question: %s\n", q_buff);
+			//printf("sample question: %s\n", q_buff);
 			read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
-			printf("sample answer: %s\n", correct_a);
+			close(open_pp);
+			//printf("sample answer: %s\n", correct_a);
 			printf("Here's your question...%s\n", q_buff);
 
 			printf("Your answer: ");
@@ -68,15 +71,17 @@ int main() {
 			a_buff[strcspn(a_buff, "\n")] = '\0';
 
 			// checks if its correct or not
-			if (strcmp(a_buff, correct_a) == 0) {
+			/*if (strcmp(a_buff, correct_a) == 0) {
 					printf("Correct! Point added.\n");
 			}
 			else {
 					printf("Wrong! The right answer is: %s\n",correct_a);
-			}
+			}*/
+			//open private pipe to send answer
 			int send_a = open(player_pipe, O_WRONLY);
 			write(send_a,a_buff,strlen(a_buff)+1);
 			close(send_a);
+			printf("waiting for turn\n");
 	}
 	unlink(player_pipe);
 	remove(player_pipe);

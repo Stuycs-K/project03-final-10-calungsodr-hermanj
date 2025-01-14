@@ -136,7 +136,7 @@ int main(){
 				memset(question, 0, sizeof(question));
 				memset(answer, 0, sizeof(answer));
       find_question(topic, question, answer);
-				printf("this is the answer from the while loop: %s\n", answer);
+				//printf("this is the answer from the while loop: %s\n", answer);
 
       // if it ran out of questions, say that and then break the loop to end the game
       if(strlen(question)==0){
@@ -146,7 +146,7 @@ int main(){
       }
 
 
-      // send question to player through pipe!
+      // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
         perror("cannot open player pipe");
@@ -169,7 +169,7 @@ int main(){
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a,player_answer,sizeof(player_answer))>0){
         player_answer[strcspn(player_answer, "\n")] = '\0';
-				//printf("received!: %s\n", player_answer);
+				printf("received!: %s\n", player_answer);
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
@@ -180,10 +180,11 @@ int main(){
           players[curr_player].score+=1;
         }
 				else {
-						printf("Wrong! The right answer is: %s",answer);
+						printf("Wrong! The right answer is: %s\n",answer);
 				}
       }
       close(get_a);
+				unlink(players[curr_player].pipe_name);
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
@@ -237,7 +238,7 @@ void find_question(char * topic, char* question, char* answer) {
   strncpy(question,q,strlen(q));
 	char* a = strsep(&linepointer, "\n");
   strncpy(answer,a,strlen(a));
-		printf("this is the answer from find_question: %s\n", answer);
+		//printf("this is the answer from find_question: %s\n", answer);
   // should also deal with if tehre's nothing left
 
   fclose(readfile);
