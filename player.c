@@ -62,9 +62,11 @@ int main() {
 					char q_buff[300];
 					char a_buff[300];
 					char correct_a[300];
+
 					memset(correct_a, 0, sizeof(correct_a));
-					memset(q_buff, 0, sizeof(q_buff)); // looked up, clear before start
+					memset(q_buff, 0, sizeof(q_buff)); // clear before start
 					memset(a_buff, 0, sizeof(a_buff));
+
 					read(open_pp,q_buff,sizeof(q_buff)); //get question from host
 					//printf("sample question: %s\n", q_buff);
 					read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
@@ -73,7 +75,8 @@ int main() {
 					printf("Here's your question...%s\n", q_buff);
 
 					printf("Your answer: ");
-					fgets(a_buff, sizeof(300), stdin);
+					fgets(a_buff, sizeof(a_buff), stdin);
+					printf("you answered... %s\n", a_buff);
 					a_buff[strcspn(a_buff, "\n")] = '\0';
 
 					// checks if its correct or not

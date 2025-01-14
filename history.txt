@@ -3,4 +3,3 @@ What was the last name of the first president of the USA?:washington
 What is the last name of the US president known for his work combatting the Great Depression?:roosevelt
 What New York borough was the infamous WWII atomic bomb project named after?:manhattan
 What is the first name of the president during the Cuban Missile Crisis?:john
-

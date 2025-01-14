@@ -21,6 +21,12 @@ to the next question.
 1. player sends the host its PID (which will be the pipe name)
 2. host adds each PID to an array that stores the pipe names
 3. the host loops through this array of pipes to know which pipe to send a question to
+
+CURRENT PROBLEMS: 
+- doesnt loop back to do quesitons after 3
+- only takes in the first 3 characteres of the answer
+- exiting the host doesnt make the player exit
+- lowercase for answers (not case sensitive, also add in instructions)
 */
 
 // for pipe, look for sigpipe
@@ -74,8 +80,8 @@ void delete_pipes(){
 			printf("im deleting pipes\n");
 			char end[100] = "end";
 			write(pp, end, sizeof(end));
-    unlink(players[i].pipe_name);
-	  remove(players[i].pipe_name);
+      unlink(players[i].pipe_name);
+	    remove(players[i].pipe_name);
 			unlink(WKP);
 			remove(WKP);
   }
@@ -142,7 +148,7 @@ int main(){
 				//printf("this is the answer from the while loop: %s\n", answer);
 
       // if it ran out of questions, say that and then break the loop to end the game
-      if(strlen(question)==0){
+      if(strlen(question)==1){
         printf("No more questions! Game over."); // separate display points function
         print_points();
 					delete_pipes();
@@ -153,7 +159,7 @@ int main(){
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
 					delete_pipes();
-        perror("cannot open player pipe");
+          perror("cannot open player pipe");
         break;
       }
 				//game is still going
@@ -193,7 +199,7 @@ int main(){
 				}
       }
       close(get_a);
-				unlink(players[curr_player].pipe_name);
+			// unlink(players[curr_player].pipe_name);
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
@@ -242,11 +248,13 @@ void find_question(char * topic, char* question, char* answer) {
 		}
 		mathq_num++;
 	}
-	char * linepointer = line;
-	char* q = strsep(&linepointer, ":");
-  strncpy(question,q,strlen(q));
-	char* a = strsep(&linepointer, "\n");
-  strncpy(answer,a,strlen(a));
+  if(sizeof(line) > 1){
+    char * linepointer = line;
+	  char* q = strsep(&linepointer, ":");
+    strncpy(question,q,strlen(q));
+	  char* a = strsep(&linepointer, "\n");
+    strncpy(answer,a,strlen(a));
+  }
 		//printf("this is the answer from find_question: %s\n", answer);
   // should also deal with if tehre's nothing left
 
