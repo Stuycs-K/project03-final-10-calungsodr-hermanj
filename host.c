@@ -170,7 +170,7 @@ int main(){
       if(read(get_a,player_answer,sizeof(player_answer))>0){
 		  printf("received!: %s\n", player_answer);
         // remove trailing newline here i forgot how
-        if (strcmp(player_answer,"end game")==0){
+        if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
           break; // point function
         }
