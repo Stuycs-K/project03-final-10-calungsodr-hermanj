@@ -73,7 +73,7 @@ int main() {
 					printf("Here's your question...%s\n", q_buff);
 
 					printf("Your answer: ");
-					fgets(a_buff, sizeof(300), stdin);
+					fgets(a_buff, sizeof(a_buff), stdin);
 					a_buff[strcspn(a_buff, "\n")] = '\0';
 
 					// checks if its correct or not

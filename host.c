@@ -193,7 +193,7 @@ int main(){
 				}
       }
       close(get_a);
-				unlink(players[curr_player].pipe_name);
+				//unlink(players[curr_player].pipe_name);
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
