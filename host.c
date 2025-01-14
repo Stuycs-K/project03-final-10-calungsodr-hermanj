@@ -27,8 +27,8 @@ to the next question.
 static void sighandler(int signo){
     if (signo == SIGINT){
       printf("\nDisconnected, game over\n");
-      remove(WKP);
       delete_pipes();
+      remove(WKP);
       exit(0);
     }
     if (signo == SIGPIPE){
@@ -63,8 +63,7 @@ struct player_struct create_player(char* player_num){
 void print_points(){
   printf("FINAL POINT COUNT:\n");
     for (int i = 0; i<MAX_PLAYERS; i++){
-	  printf("Player %d: %d\n", i, players[i].score);
-
+	    printf("Player %d: %d\n", i+1, players[i].score);
     // possible add-on -- tell who the winner is
   }
 }
@@ -100,7 +99,6 @@ int main(){
     // for every player ! need the max to begin
     while (num_players<MAX_PLAYERS){
       // if there's something to read!
-      //int player_pid = atoi(pid); // convert pid to integer, looked this up
       if (read(from_client,pid,sizeof(pid))>0){
         players[num_players] = create_player(pid);
 
@@ -181,12 +179,7 @@ int main(){
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
-
-    // deal with final scores... print from array.... function
-    for (int i = 0; i<num_players; i++){
-      printf("Player %d: %d points\n", i+1, players[i].score);
-    }
-
+    print_points();
     delete_pipes();
 }
 
