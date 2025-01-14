@@ -40,6 +40,15 @@ Spent 2 hours at home rewriting code to fit new strategy (no semaphores,
 introduce structs, change the order of the code, base logic off of lab
 15's handshake). The setup now works correctly.
 
+### 2024-01-13 - Testing and question sending
+Spent 40 minutes in class testing with Joy. Updated text files and made 
+the point system printer.
+
+Spent 30 minutes at home fixing some signal handling and other errors,
+fixing some of the question cycling process.
+
+
+
 
 
 
@@ -71,3 +80,10 @@ Spent 20 minutes with Raehcel explaining code, getting on the same page,
 and fixing merge conflicts.
 
 Spent 30 minutes at home adding pipes to the player files.
+
+### 2024-01-10 - merging
+Spent class time merging and planning on weekend work
+
+### 2024-01-13 - pipes
+Spent an hour of consecutive frees making the pipes connect properly,
+making sure the host and player are on the same page.

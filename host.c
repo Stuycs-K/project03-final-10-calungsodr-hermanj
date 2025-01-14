@@ -11,27 +11,32 @@ GAME HOST (main) should:
 1. Allow multiple players to join the game. (fork process) do we need server?
 2. Print an introduction and instructions for the players.
 3. Assign player numbers. First to join is player one, second is player 2, and so on...
-4. Print out a list of topics (ex. history, science, math) for player 1 to choose from.
 5. After selection, the host will access the corresponding topic's Q&A file, read it as
 intended to place the current question and answer into shared memory.
 6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
 to the next question.
 7. Keep asking questions until a user types "end game" or the Q&A file ends.
 
-*/
-/*
 1/11 update to implement
-
 1. player sends the host its PID (which will be the pipe name)
 2. host adds each PID to an array that stores the pipe names
 3. the host loops through this array of pipes to know which pipe to send a question to
 */
 
-
-int err(){
-  printf("errno %d\n", errno);
-  printf("%s\n",strerror(errno));
-  exit(1);
+// for pipe, look for sigpipe
+// SIGNAL HANDLING
+static void sighandler(int signo){
+    if (signo == SIGINT){
+      printf("\nDisconnected, game over\n");
+      delete_pipes();
+      remove(WKP);
+      exit(0);
+    }
+    if (signo == SIGPIPE){
+      printf("\nDisconnected pipe.\n");
+		  delete_pipes();
+		  exit(0);
+    }
 }
 
 static int histq_num = 0;
@@ -44,7 +49,7 @@ struct player_struct {
   int score;
 };
 
-struct player_struct players[MAX_PLAYERS]; //array of players!!!
+struct player_struct players[MAX_PLAYERS]; // array of players!!!
 int num_players = 0;
 
 // is this correct????????
@@ -56,6 +61,14 @@ struct player_struct create_player(char* player_num){
   return p;
 }
 
+void print_points(){
+  printf("FINAL POINT COUNT:\n");
+    for (int i = 0; i<MAX_PLAYERS; i++){
+	    printf("Player %d: %d\n", i+1, players[i].score);
+    // possible add-on -- tell who the winner is
+  }
+}
+
 void delete_pipes(){
   unlink(WKP);
 	remove(WKP);
@@ -64,21 +77,6 @@ void delete_pipes(){
     unlink(players[i].pipe_name);
 	  remove(players[i].pipe_name);
   }
-}
-
-// for pipe, look for sigpipe
-// SIGNAL HANDLING
-static void sighandler(int signo){
-    if (signo == SIGINT){
-      printf("\nDisconnected, game over\n");
-      delete_pipes();
-      exit(0);
-    }
-    if (signo == SIGPIPE){
-      printf("\nDisconnected pipe.\n");
-		delete_pipes();
-		exit(0);
-    }
 }
 
 // handles flow of the game, forking(?)
@@ -96,19 +94,16 @@ int main(){
 
     // open wkp.[blocks]
     int from_client = open(WKP, O_RDONLY);
-    if (from_client==-1) err();
+    if (from_client==-1) perror("can't open WKP 1");
 
     char pid[20];
     // for every player ! need the max to begin
     while (num_players<MAX_PLAYERS){
       // if there's something to read!
-      //int player_pid = atoi(pid); // convert pid to integer, looked this up
       if (read(from_client,pid,sizeof(pid))>0){
         players[num_players] = create_player(pid);
 
-        if(mkfifo(players[num_players].pipe_name, 0644)==-1){
-          perror("cannot create player pipe");
-        }
+        mkfifo(players[num_players].pipe_name, 0644);
         printf("Player %d joined!\n", num_players+1);
         num_players++;
       }
@@ -145,6 +140,7 @@ int main(){
       // if it ran out of questions, say that and then break the loop to end the game
       if(strlen(question)==0){
         printf("No more questions! Game over."); // separate display points function
+        print_points();
         break;
       }
 
@@ -155,7 +151,7 @@ int main(){
         perror("cannot open player pipe");
         break;
       }
-      write(send_q,question,strlen(question+1));
+      write(send_q,question,strlen(question)+1);
       close(send_q);
 
       // no wait for answer...
@@ -168,7 +164,8 @@ int main(){
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a,player_answer,sizeof(player_answer))>0){
-		  printf("received!: %s\n", player_answer);
+        player_answer[strcspn(player_answer, "\n")] = '\0';
+				//printf("received!: %s\n", player_answer);
         // remove trailing newline here i forgot how
         if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
@@ -179,21 +176,17 @@ int main(){
           players[curr_player].score+=1;
           // handle lowercase, maybe in the part that actually gets it
         }
-		else {
-			printf("Wrong! The right answer is: %s",answer);
-		}
+				else {
+						printf("Wrong! The right answer is: %s",answer);
+				}
       }
       close(get_a);
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
-
-    // deal with final scores... print from array.... function
-    for (int i = 0; i<num_players; i++){
-      printf("Player %d: %d points\n", i+1, players[i].score);
-    }
-
+    print_points();
     delete_pipes();
+    exit(0);
 }
 
 /* Called in main whenever the host should ask another question.
@@ -214,7 +207,7 @@ void find_question(char * topic, char* question, char* answer) {
 	FILE * readfile;
 	readfile = fopen(topicbuff, "r");
 	if (readfile == NULL) {
-		err();
+		perror("cannot open question file");
 	}
 
 	char line[1000];
@@ -244,7 +237,5 @@ void find_question(char * topic, char* question, char* answer) {
   // should also deal with if tehre's nothing left
 
   fclose(readfile);
-
-  // close file
 }
 

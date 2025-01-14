@@ -1,83 +1,26 @@
 #include "player.h"
 #include "host.h"
 
-//before merge
-/*
-int main() {
-	//prompts the user for the answer
-	
-	//making private pipe
-	int pid;
-	char name[10];
-	pid = getpid();
-	snprintf(name, 10, "player%d", pid);
-	if (mkfifo(name, 0666) < 0 ){
-		printf("private pipe couldn't be created\n");
-		err();
-	}
-	
-	//connecting to WKP
-	int from_host;
-	from_host = open(WKP, O_RDONLY, 0666);
-	if (from_host < 0) {
-		printf("mario couldn't be opened\n");
-		err();
-	}
-	
-	//wrong code
-	//int *playernum;
-	//read(from_host, playernum, sizeof(int));
-	
-	
-	char * answer;
-	char useranswer[20];
-	printf("Your answer: ");
-	fgets(useranswer, sizeof(useranswer), stdin);
-	
-	//get rid of \n
-	for (int i = 0; i < sizeof(useranswer); i++) {
-		if (useranswer[i] == '\n') {
-			useranswer[i] = '\0';
-			i = sizeof(useranswer);
-		}
-	}
-	printf("useranswer: %s\n", useranswer);
-	printf("correct answer: %s\n", answer);
-	
-	if (strcmp(answer, useranswer) == 0) {
-		printf("YOU HAVE THE RIGHT ANSWER\n");
-	}
-	else {
-		printf("INCORRECT, TRY AGAIN NEXT TIME\n");
-	}
-	return 0;
-*/
+// singhandler
 // for pipe, look for sigpipe
 static void sighandler(int signo){
-    if (signo == SIGINT || signo == SIGPIPE){
-        printf("Disconnected.\n");
+    if (signo == SIGINT){
+        printf("\nDisconnected.\n");
+        exit(0);
+    }
+    if (signo == SIGPIPE){
+        printf("\nDisconnected.\n");
         exit(0);
     }
 }
 
-// singhandler
-
-/*
-
-idk what to add in the beginning... how will it know which
-player_pipe it is? ex. "player1" "player2"
 
 // if 'end game' typed, break
-*/
-
-/*
-	player pipes should be WKPs. name them "player1", "player2", etc...ACCESSX_MAX_TABLESIZE
-
-*/
 
 int main() {
 
-	signal(SIGPIPE, sighandler);
+    signal(SIGPIPE, sighandler);
+    signal(SIGINT, sighandler);
 
 	//prompts the user for the answer
 	//connecting to WKP
@@ -108,29 +51,26 @@ int main() {
 
 	// wait for questions!
 	while (1){
-		if(read(open_pp,buffer,300)>0){ //why does nothing get sent????
+		memset(buffer, 0, sizeof(buffer)); // looked up, clear before start
+		if(read(open_pp,buffer,300)>0){
 			printf("Here's your question...%s\n", buffer);
 
 			printf("Your answer: ");
+			memset(buffer, 0, sizeof(buffer));
 			fgets(buffer, sizeof(300), stdin);
+			buffer[strcspn(buffer, "\n")] = '\0';
 
-			//get rid of \n and lowercase all
-			for (int i = 0; i < sizeof(buffer); i++) {
-			  buffer[i] = tolower(buffer[i]);
-			  if (buffer[i] == '\n') {
-				buffer[i] = '\0';
-				i = sizeof(buffer);
-			  }
-			}
-			
-			// senf user answer back to host
+			// send user answer back to host
+
 			// handle it, make it all lowercase
-			int send_a = open(WKP, O_WRONLY);
+			int send_a = open(player_pipe, O_WRONLY);
 			write(send_a,buffer,strlen(buffer)+1);
 			close(send_a);
 		}
 	}
 	unlink(player_pipe);
+	remove(player_pipe);
+	exit(0);
 }
 
 // add exiting signals

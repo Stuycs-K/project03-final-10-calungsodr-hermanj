@@ -1,3 +1,5 @@
 What is the capital of New York?:albany
 What is the capital of China?:beijing
 What is the capital of the Philippines?:manila
+What is the largest continent?:asia
+What is the capital of Russia?:moscow
