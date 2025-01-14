@@ -88,6 +88,12 @@ Spent class time merging and planning on weekend work
 Spent an hour of consecutive frees making the pipes connect properly,
 making sure the host and player are on the same page.
 
-Spent 40 minutes trying to figure out how our code broke, added print 
+Spent class time testing with Raechel and fixing pipes.
+
+Spent 40 minutes at home trying to figure out how our code broke, added print 
 statements to find where the piping messed up, changed a bit of the player.c 
-so that the player know if they got the question right or wrong
+so that the player know if they got the question right or wrong.
+
+### 2024-01-14 - game end
+Spent an hour of consecutive frees fixing the loops and trying to get the player to
+exit when the host exits.
