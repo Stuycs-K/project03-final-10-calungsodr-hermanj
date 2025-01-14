@@ -87,3 +87,7 @@ Spent class time merging and planning on weekend work
 ### 2024-01-13 - pipes
 Spent an hour of consecutive frees making the pipes connect properly,
 making sure the host and player are on the same page.
+
+Spent 40 minutes trying to figure out how our code broke, added print 
+statements to find where the piping messed up, changed a bit of the player.c 
+so that the player know if they got the question right or wrong
