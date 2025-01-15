@@ -29,22 +29,6 @@ CURRENT PROBLEMS:
 - lowercase for answers (not case sensitive, also add in instructions)
 */
 
-// for pipe, look for sigpipe
-// SIGNAL HANDLING
-static void sighandler(int signo){
-    if (signo == SIGINT){
-      printf("\nDisconnected, game over\n");
-      delete_pipes();
-      remove(WKP);
-      exit(0);
-    }
-    if (signo == SIGPIPE){
-      printf("\nDisconnected pipe.\n");
-		  delete_pipes();
-		  exit(0);
-    }
-}
-
 struct player_struct {
   int pid;
   char pipe_name[20];
@@ -65,6 +49,25 @@ struct player_struct create_player(char* player_num){
   return p;
 }
 
+// for pipe, look for sigpipe
+// SIGNAL HANDLING
+static void sighandler(int signo){
+    if (signo == SIGINT){
+      printf("\nGame disconnected. Players will disconnect automatically.\n");
+      for(int i = 0; i<MAX_PLAYERS; i++){
+        if(players[i].pid>0) kill(players[i].pid, SIGINT); // kills using pid
+      }
+      delete_pipes();
+      remove(WKP);
+      exit(0);
+    }
+    if (signo == SIGPIPE){
+      printf("\nDisconnected pipe.\n");
+		  delete_pipes();
+		  exit(0);
+    }
+}
+
 void print_points(){
   printf("FINAL POINT COUNT:\n");
     for (int i = 0; i<MAX_PLAYERS; i++){
@@ -77,14 +80,14 @@ void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
 	  //sends a message so the players disconnect
-			printf("im deleting pipes\n");
 			char end[100] = "end";
 			write(pp, end, sizeof(end));
+      kill(players[i].pid,SIGINT); // send sigint
       unlink(players[i].pipe_name);
 	    remove(players[i].pipe_name);
-			unlink(WKP);
-			remove(WKP);
   }
+  unlink(WKP);
+	remove(WKP);
 }
 
 // handles flow of the game, forking(?)
@@ -147,14 +150,6 @@ int main(){
       find_question(topic, question, answer);
 				//printf("this is the answer from the while loop: %s\n", answer);
 
-      // if it ran out of questions, say that and then break the loop to end the game
-      if(strlen(question)==1){
-        printf("No more questions! Game over."); // separate display points function
-        print_points();
-					delete_pipes();
-        break;
-      }
-
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
@@ -172,7 +167,7 @@ int main(){
 				printf("answer: %s\n", answer);
       close(send_q);
 
-      // no wait for answer...
+      // now wait for answer...
       int get_a = open(players[curr_player].pipe_name,O_RDONLY);
         if (get_a < 0){
 						delete_pipes();
@@ -184,10 +179,10 @@ int main(){
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a,player_answer,sizeof(player_answer))>0){
         player_answer[strcspn(player_answer, "\n")] = '\0';
-				printf("received!: %s\n", player_answer);
-        // remove trailing newline here i forgot how
+
         if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
+          delete_pipes();
           break; // point function
         }
         else if (strcmp(player_answer,answer)==0){
@@ -230,6 +225,13 @@ void find_question(char * topic, char* question, char* answer) {
 	}
 
 	char line[1000];
+  // if it ran out of questions, say that and end the game
+  if(fgets(line,sizeof(line),readfile)==NULL){
+    printf("No more questions! Game over."); // separate display points function
+    print_points();
+		delete_pipes();
+    // exit how..????
+  }
 	if (strcmp(topic, "history") == 0) {
 		for (int i = 0; i <= histq_num; i++) {
 			fgets(line, sizeof(line), readfile);

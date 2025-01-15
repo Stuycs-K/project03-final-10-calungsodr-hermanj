@@ -4,12 +4,15 @@
 // singhandler
 // for pipe, look for sigpipe
 static void sighandler(int signo){
-    if (signo == SIGINT){
-        printf("\nDisconnected.\n");
-        exit(0);
-    }
-    if (signo == SIGPIPE){
-        printf("\nDisconnected.\n");
+    if (signo == SIGINT || signo == SIGPIPE){
+        printf("\nPlayer disconnected. Ending game...\n");
+
+		/*int send_pid = open(WKP, O_WRONLY);
+		if (send_pid >= 0) {
+			char exit_msg[6] = "end";
+			write(send_pid,exit_msg, sizeof(exit_msg));
+			close(send_pid);
+		}*/
         exit(0);
     }
 }
