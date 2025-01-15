@@ -22,13 +22,13 @@ static void sighandler(int signo){
 
 int main() {
 
-    signal(SIGPIPE, sighandler);
-    signal(SIGINT, sighandler);
+	signal(SIGPIPE, sighandler);
+	signal(SIGINT, sighandler);
 
 	//prompts the user for the answer
 	//connecting to WKP
 	char player_pipe[500];
-		char buffer[500];
+	char buffer[500];
 
 	// send PID to WKP
 	int send_pid = open(WKP, O_WRONLY);
@@ -47,7 +47,7 @@ int main() {
 
 	printf("Player has joined the game!\n");
 		
-		char end_buff[100];
+	char end_buff[100];
 	// wait for questions!
 	while (1){
 			//read(game_end, end_buff, sizeof(end_buff));
@@ -60,40 +60,39 @@ int main() {
 			if (strcmp(end_buff, "end") == 0) {
 					break;
 			}
-					//open private pipe to read question and answer
-					
-					char q_buff[300];
-					char a_buff[300];
-					char correct_a[300];
+			//open private pipe to read question and answer
+			
+			char q_buff[300];
+			char a_buff[300];
+			char correct_a[300];
 
-					memset(correct_a, 0, sizeof(correct_a));
-					memset(q_buff, 0, sizeof(q_buff)); // clear before start
-					memset(a_buff, 0, sizeof(a_buff));
+			memset(correct_a, 0, sizeof(correct_a));
+			memset(q_buff, 0, sizeof(q_buff)); // clear before start
+			memset(a_buff, 0, sizeof(a_buff));
 
-					read(open_pp,q_buff,sizeof(q_buff)); //get question from host
-					//printf("sample question: %s\n", q_buff);
-					read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
-					close(open_pp);
-					//printf("sample answer: %s\n", correct_a);
+			read(open_pp,q_buff,sizeof(q_buff)); //get question from host
+			//printf("sample question: %s\n", q_buff);
+			read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
+			close(open_pp);
+			//printf("sample answer: %s\n", correct_a);
 
-					printf("Your answer: ");
-					fgets(a_buff, sizeof(a_buff), stdin);
-					a_buff[strcspn(a_buff, "\n")] = '\0';
-
-					// checks if its correct or not
-					/*if (strcmp(a_buff, correct_a) == 0) {
-							printf("Correct! Point added.\n");
-					}
-					else {
-							printf("Wrong! The right answer is: %s\n",correct_a);
-					}*/
-					//open private pipe to send answer
-					int send_a = open(player_pipe, O_WRONLY);
-					write(send_a,a_buff,strlen(a_buff)+1);
-					close(send_a);
-					printf("waiting for turn\n");
+			printf("Your answer: ");
+			fgets(a_buff, sizeof(a_buff), stdin);
+			//get rid of \n and lowercase all
+			for (int i = 0; i < sizeof(a_buff); i++) {
+				a_buff[i] = tolower(a_buff[i]);
+				if (a_buff[i] == '\n') {
+					a_buff[i] = '\0';
+					i = sizeof(a_buff);
+				}
+			}
+			//open private pipe to send answer
+			int send_a = open(player_pipe, O_WRONLY);
+			write(send_a,a_buff,strlen(a_buff)+1);
+			close(send_a);
+			printf("waiting for turn\n");
 	}
-		printf("GAME OVER\n");
+	printf("GAME OVER\n");
 	unlink(player_pipe);
 	remove(player_pipe);
 	exit(0);
