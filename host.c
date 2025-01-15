@@ -1,3 +1,4 @@
+
 #include "host.h"
 
 #define MAX_PLAYERS 3
@@ -23,27 +24,9 @@ to the next question.
 3. the host loops through this array of pipes to know which pipe to send a question to
 
 CURRENT PROBLEMS: 
-- doesnt loop back to do quesitons after 3
-- only takes in the first 3 characteres of the answer
 - exiting the host doesnt make the player exit
 - lowercase for answers (not case sensitive, also add in instructions)
 */
-
-// for pipe, look for sigpipe
-// SIGNAL HANDLING
-static void sighandler(int signo){
-    if (signo == SIGINT){
-      printf("\nDisconnected, game over\n");
-      delete_pipes();
-      remove(WKP);
-      exit(0);
-    }
-    if (signo == SIGPIPE){
-      printf("\nDisconnected pipe.\n");
-		  delete_pipes();
-		  exit(0);
-    }
-}
 
 struct player_struct {
   int pid;
@@ -84,6 +67,27 @@ void delete_pipes(){
 	    remove(players[i].pipe_name);
 			unlink(WKP);
 			remove(WKP);
+  }
+}
+
+// for pipe, look for sigpipe
+// SIGNAL HANDLING
+static void sighandler(int signo){
+  if (signo == SIGINT){
+    printf("\nDisconnected game. Players will be disconnected automatically.\n");
+    for (int i = 0; i<MAX_PLAYERS; i++){
+      if (players[i].pid>0){
+        kill(players[i].pid,SIGINT);
+      }
+    }
+    delete_pipes();
+    remove(WKP);
+    exit(0);
+  }
+  if (signo == SIGPIPE){
+    printf("\nDisconnected pipe.\n");
+		delete_pipes();
+		exit(0);
   }
 }
 

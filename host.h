@@ -12,6 +12,7 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <ctype.h>
+#include <signal.h>
 
 #ifndef HOST_H
 #define HOST_H
