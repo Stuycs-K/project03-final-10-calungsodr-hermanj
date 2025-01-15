@@ -51,6 +51,11 @@ fixing some of the question cycling process.
 Spent 40 minutes finding and fixing issues with Joy. Fixed question
 loop error and figured out exiting with a typed "end" command.
 
+Spent 1 hour at home continuing to test and debug. Rewrote the
+function that's used to find a question to fix another error where 
+the game would not quit when the question bank is depleted. Improved
+host sighandling to communicate with player (to be fixed further).
+
 
 
 
@@ -93,12 +98,21 @@ making sure the host and player are on the same page.
 
 Spent class time testing with Raechel and fixing pipes.
 
-Spent 40 minutes at home trying to figure out how our code broke, added print 
-statements to find where the piping messed up, changed a bit of the player.c 
-so that the player know if they got the question right or wrong.
+Spent 40 minutes at home trying to figure out how our code broke, 
+added print statements to find where the piping messed up, changed 
+a bit of the player.c so that the player know if they got the 
+question right or wrong.
 
 ### 2024-01-14 - game end and looping
-Spent an hour of consecutive frees fixing the loops and trying to get the player to
-exit when the host exits.
+Spent an hour of consecutive frees fixing the loops and trying to get 
+the player to exit when the host exits.
 
 Spent class time identifying issues and distributing tasks to finish
+
+Spent an 50 minutes at home testing and adding print statements to 
+check where our code didn't exit properly. Also made the answers case 
+insensitive and added some instructions
+
+### 2024-01-15 - game end and question sending
+Spent 30 minutes of free trying to find why the question doesnt send
+sometimes now.
