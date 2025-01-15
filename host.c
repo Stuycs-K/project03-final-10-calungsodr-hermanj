@@ -180,8 +180,8 @@ int main(){
 	  break;
 	}
 	write(send_q, "go", sizeof("go"));
+	write(send_q,question,sizeof(question));
 	printf("question: %s\n", question);
-	write(send_q,question,strlen(question)+1);
 	close(send_q);
 
 	// now wait for answer...

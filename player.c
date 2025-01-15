@@ -74,7 +74,9 @@ int main() {
 	memset(q_buff, 0, sizeof(q_buff)); // clear before start
 	memset(a_buff, 0, sizeof(a_buff));
 
+	printf("%s", q_buff);
 	read(open_pp,q_buff,sizeof(q_buff)); //get question from host
+	printf("%s\n", q_buff);
 	printf("Here's your question...: %s\n", q_buff);
 	//printf("sample question: %s\n", q_buff);
 	//read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
