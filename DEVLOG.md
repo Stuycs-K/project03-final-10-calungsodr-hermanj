@@ -51,6 +51,11 @@ fixing some of the question cycling process.
 Spent 40 minutes finding and fixing issues with Joy. Fixed question
 loop error and figured out exiting with a typed "end" command.
 
+Spent 1 hour at home continuing to test and debug. Rewrote the
+function that's used to find a question to fix another error where 
+the game would not quit when the question bank is depleted. Improved
+host sighandling to communicate with player (to be fixed further).
+
 
 
 
