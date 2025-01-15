@@ -112,3 +112,7 @@ Spent class time identifying issues and distributing tasks to finish
 Spent an 50 minutes at home testing and adding print statements to 
 check where our code didn't exit properly. Also made the answers case 
 insensitive and added some instructions
+
+### 2024-01-15 - game end and question sending
+Spent 30 minutes of free trying to find why the question doesnt send
+sometimes now.
