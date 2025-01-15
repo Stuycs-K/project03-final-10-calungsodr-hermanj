@@ -1,7 +1,7 @@
 
 #include "host.h"
 
-#define MAX_PLAYERS 3
+#define MAX_PLAYERS 2 // can make this chosen by user, but how? 
 #define MAX_QUESTION 5;
 
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
@@ -26,6 +26,10 @@ to the next question.
 CURRENT PROBLEMS: 
 - exiting the host doesnt make the player exit
 - lowercase for answers (not case sensitive, also add in instructions)
+
+
+bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
+- using ctrl c on host to exit only works under certain conditions
 */
 
 struct player_struct {
@@ -98,7 +102,7 @@ int main(){
       perror("error in making WKP");
     }
 
-    printf("Server setup finished, waiting for %d players to join! (Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
+    printf("Server setup finished, waiting for %d players to join!\n(Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
 
     // open wkp.[blocks]
     int from_client = open(WKP, O_RDONLY);
@@ -119,7 +123,13 @@ int main(){
 
     close(from_client);
 
-    printf("welcome, instructions here...\n");
+    // printf("\nHow many players (1-5)? \n");
+    // char play_num[3];
+    // fgets(play_num, sizeof(play_num), stdin);
+    // MAX_PLAYERS = atoi(play_num);
+    // struct player_struct players[MAX_PLAYERS]; // array of players!!!
+
+    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
     printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
 
     char topic[20];
