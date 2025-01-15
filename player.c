@@ -78,7 +78,14 @@ int main() {
 
 					printf("Your answer: ");
 					fgets(a_buff, sizeof(a_buff), stdin);
-					a_buff[strcspn(a_buff, "\n")] = '\0';
+	  //get rid of \n and lowercase all
+	  for (int i = 0; i < sizeof(a_buff); i++) {
+		a_buff[i] = tolower(a_buff[i]);
+		if (a_buff[i] == '\n') {
+		  a_buff[i] = '\0';
+		  i = sizeof(a_buff);
+		}
+	  }
 
 					// checks if its correct or not
 					/*if (strcmp(a_buff, correct_a) == 0) {
