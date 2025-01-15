@@ -1,18 +1,21 @@
 #include "player.h"
 #include "host.h"
 
+static char player_pp[20];
 // singhandler
 // for pipe, look for sigpipe
 static void sighandler(int signo){
     if (signo == SIGINT || signo == SIGPIPE){
         printf("\nPlayer disconnected. Ending game...\n");
-
-		/*int send_pid = open(WKP, O_WRONLY);
+	  remove(player_pp);
+	  /*
+		int send_pid = open(WKP, O_WRONLY);
 		if (send_pid >= 0) {
 			char exit_msg[6] = "end";
 			write(send_pid,exit_msg, sizeof(exit_msg));
 			close(send_pid);
-		}*/
+		}
+	   */
         exit(0);
     }
 }
@@ -43,6 +46,9 @@ int main() {
 
 	mkfifo(player_pipe, 0666); // err
 	
+  for (int i = 0; i < strlen(player_pipe); i++) {
+	player_pp[i] = player_pipe[i];
+  }
 	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
 	printf("Player has joined the game!\n");

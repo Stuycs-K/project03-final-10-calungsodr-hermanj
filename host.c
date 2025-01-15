@@ -137,7 +137,7 @@ int main(){
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
-
+  
     while(1){
       // loop through the pipes to speak to a specific one
 		  char question[500];
