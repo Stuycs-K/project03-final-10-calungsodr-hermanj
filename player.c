@@ -56,7 +56,7 @@ int main() {
 				perror("cant open player pipe");
 			}
 			read(open_pp, end_buff, sizeof(end_buff));
-			printf("is the game over?: %s\n", end_buff);
+			printf("Here's your question...: %s\n", end_buff);
 			if (strcmp(end_buff, "end") == 0) {
 					break;
 			}
@@ -75,7 +75,6 @@ int main() {
 					read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
 					close(open_pp);
 					//printf("sample answer: %s\n", correct_a);
-					printf("Here's your question...%s\n", q_buff);
 
 					printf("Your answer: ");
 					fgets(a_buff, sizeof(a_buff), stdin);

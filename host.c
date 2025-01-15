@@ -59,15 +59,11 @@ void print_points(){
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
-	  //sends a message so the players disconnect
-			printf("im deleting pipes\n");
 			char end[100] = "end";
 			write(pp, end, sizeof(end));
       unlink(players[i].pipe_name);
-	    remove(players[i].pipe_name);
-			unlink(WKP);
-			remove(WKP);
   }
+  unlink(WKP);
 }
 
 // for pipe, look for sigpipe
@@ -144,55 +140,44 @@ int main(){
 
     while(1){
       // loop through the pipes to speak to a specific one
-		char question[500];
-		char answer[500];
-				memset(question, 0, sizeof(question));
-				memset(answer, 0, sizeof(answer));
+		  char question[500];
+		  char answer[500];
+			memset(question, 0, sizeof(question));
+			memset(answer, 0, sizeof(answer));
       find_question(topic, question, answer);
 				//printf("this is the answer from the while loop: %s\n", answer);
-
-      // if it ran out of questions, say that and then break the loop to end the game
-      if(strlen(question)==1){
-        printf("No more questions! Game over."); // separate display points function
-        print_points();
-					delete_pipes();
+      if(strlen(question)==0){
+        printf("No more questions! Game over.\n"); // separate display points function
+				delete_pipes();
         break;
       }
 
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
-					delete_pipes();
-          perror("cannot open player pipe");
+				delete_pipes();
+        perror("cannot open player pipe");
         break;
-      }
-				//game is still going
-				char game[100] = "go";
-				write(send_q, game, sizeof(game));
-				
+      }	
       write(send_q,question,strlen(question)+1);
-				printf("question: %s\n", question);
-				write(send_q,answer, strlen(answer) + 1);
-				printf("answer: %s\n", answer);
       close(send_q);
 
-      // no wait for answer...
+      // now wait for answer...
       int get_a = open(players[curr_player].pipe_name,O_RDONLY);
-        if (get_a < 0){
-						delete_pipes();
+      if (get_a < 0){
+				delete_pipes();
         perror("cannot open player pipe");
         break;
       }
 
       char player_answer[500];
       // ok so we have to make it so that the player pipe writing side will send in a stdin input
-      if(read(get_a,player_answer,sizeof(player_answer))>0){
-        player_answer[strcspn(player_answer, "\n")] = '\0';
-				printf("received!: %s\n", player_answer);
-        // remove trailing newline here i forgot how
+      if(read(get_a, player_answer, sizeof(player_answer))>0){
+        player_answer[strcspn(player_answer, "\n")] = '\0'; // removes trailing newline
+
         if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
-          break; // point function
+          break;
         }
         else if (strcmp(player_answer,answer)==0){
           printf("Correct! Point added.\n");
@@ -209,59 +194,52 @@ int main(){
     }
     print_points();
     delete_pipes();
-    exit(0);
+    return 0;
 }
 
 /* Called in main whenever the host should ask another question.
 "q_num" refers to the question number to be asked. This function will go through the Q&A file
 and ask the corresponding question. */
-//copy the code for check_answer(char* answer)s
-char* ask_question(int file_des, char* question){ //change later
-	// question should be found by searching through the file with q_num as the number question
-	printf("%s\n", question);
-	return question;
+
+void find_question(char *topic, char *question, char *answer) {
+    char topicbuff[20];
+    snprintf(topicbuff, sizeof(topicbuff), "%s.txt", topic);
+
+    FILE *readfile = fopen(topicbuff, "r");
+    if (readfile == NULL) {
+        perror("cannot open question file");
+        return;
+    }
+
+    char line[1000];
+    int *q_num = NULL;
+
+    // q_num points to the correct # question
+    if (strcmp(topic, "history") == 0) q_num = &histq_num;
+    else if (strcmp(topic, "geography") == 0) q_num = &geoq_num;
+    else if (strcmp(topic, "math") == 0) q_num = &mathq_num;
+    else {
+        fclose(readfile);
+        return;
+    }
+
+    // is the current line on the right number?
+    int curr_line = 0;
+    while(fgets(line, sizeof(line), readfile)){
+      if(curr_line==*q_num){
+        char * linepointer = line;
+	      char* q = strsep(&linepointer, ":");
+	      char* a = strsep(&linepointer, "\n");
+        strncpy(question,q,strlen(q));
+        strncpy(answer,a,strlen(a));
+
+        // increment to get to the next q the next time this is called
+        (*q_num)++;
+
+        fclose(readfile);
+        return;
+      }
+      curr_line++;
+    }
+    fclose(readfile);
 }
-
-void find_question(char * topic, char* question, char* answer) {
-
-	char topicbuff[20];
-	snprintf(topicbuff, 20, "%s.txt", topic); //adds .txt to the topic
-	//printf("%s\n", topicbuff);
-	FILE * readfile;
-	readfile = fopen(topicbuff, "r");
-	if (readfile == NULL) {
-		perror("cannot open question file");
-	}
-
-	char line[1000];
-	if (strcmp(topic, "history") == 0) {
-		for (int i = 0; i <= histq_num; i++) {
-			fgets(line, sizeof(line), readfile);
-		}
-		histq_num++;
-	}
-	else if (strcmp(topic, "geography") == 0) {
-		for (int i = 0; i <= geoq_num; i++) {
-			fgets(line, sizeof(line), readfile);
-		}
-		geoq_num++;
-	}
-	else if (strcmp(topic, "math") == 0) {
-		for (int i = 0; i <= mathq_num; i++) {
-			fgets(line, sizeof(line), readfile);
-		}
-		mathq_num++;
-	}
-  if(sizeof(line) > 1){
-    char * linepointer = line;
-	  char* q = strsep(&linepointer, ":");
-    strncpy(question,q,strlen(q));
-	  char* a = strsep(&linepointer, "\n");
-    strncpy(answer,a,strlen(a));
-  }
-		//printf("this is the answer from find_question: %s\n", answer);
-  // should also deal with if tehre's nothing left
-
-  fclose(readfile);
-}
-
