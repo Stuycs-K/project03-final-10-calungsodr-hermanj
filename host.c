@@ -58,10 +58,10 @@ void print_points(){
 
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
-			int pp = open(players[i].pipe_name, O_WRONLY);
-			char end[100] = "end";
-			write(pp, end, sizeof(end));
-      unlink(players[i].pipe_name);
+	int pp = open(players[i].pipe_name, O_WRONLY);
+	char end[100] = "end";
+	write(pp, end, sizeof(end));
+	unlink(players[i].pipe_name);
   }
   unlink(WKP);
 }
@@ -71,13 +71,16 @@ void delete_pipes(){
 static void sighandler(int signo){
   if (signo == SIGINT){
     printf("\nDisconnected game. Players will be disconnected automatically.\n");
-    for (int i = 0; i<MAX_PLAYERS; i++){
-      if (players[i].pid>0){
-        kill(players[i].pid,SIGINT);
-      }
-    }
-    delete_pipes();
-    remove(WKP);
+	delete_pipes();
+	printf("pipes deleted successfully\n");
+	remove(WKP);
+	printf("wkp removed successfully\n");
+	for (int i = 0; i<MAX_PLAYERS; i++){
+	  printf("players currently being disconnected\n");
+	  if (players[i].pid>0){
+		kill(players[i].pid,SIGINT);
+	  }
+	}
     exit(0);
   }
   if (signo == SIGPIPE){
@@ -89,112 +92,131 @@ static void sighandler(int signo){
 
 // handles flow of the game, forking(?)
 int main(){
-    // for signals
-    signal(SIGPIPE, sighandler);
-    signal(SIGINT, sighandler);
+  // for signals
+  signal(SIGPIPE, sighandler);
+  signal(SIGINT, sighandler);
 
-    // make WKP
-    if (mkfifo(WKP, 0644)<0) {
-      perror("error in making WKP");
-    }
+  // make WKP
+  if (mkfifo(WKP, 0644)<0) {
+	perror("error in making WKP");
+  }
 
-    printf("Server setup finished, waiting for %d players to join! (Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
+  printf("Server setup finished, waiting for %d players to join! (Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
 
-    // open wkp.[blocks]
-    int from_client = open(WKP, O_RDONLY);
-    if (from_client==-1) perror("can't open WKP 1");
+  // open wkp.[blocks]
+  int from_client = open(WKP, O_RDONLY);
+  if (from_client==-1) perror("can't open WKP 1");
 
-    char player_pipe[20];
-    // for every player ! need the max to begin
-    while (num_players<MAX_PLAYERS){
-      // if there's something to read!
-      if (read(from_client,player_pipe,sizeof(player_pipe))>0){
-        players[num_players] = create_player(player_pipe);
+  char player_pipe[20];
+  // for every player ! need the max to begin
+  while (num_players<MAX_PLAYERS){
+  // if there's something to read!
+	if (read(from_client,player_pipe,sizeof(player_pipe))>0){
+	  players[num_players] = create_player(player_pipe);
 
-        mkfifo(players[num_players].pipe_name, 0644);
-        printf("Player %d joined!\n", num_players+1);
-        num_players++;
-      }
-    }
+	  mkfifo(players[num_players].pipe_name, 0644);
+	  printf("Player %d joined!\n", num_players+1);
+	  num_players++;
+	}
+  }
 
-    close(from_client);
+  close(from_client);
 
-    printf("welcome, instructions here...\n");
-    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
+  printf("welcome, instructions here...\n");
+  printf("to end the game, write \"end\" in the player window\n");
+  printf("Please choose a topic (History, Geography, Math): ");
 
-    char topic[20];
-    fgets(topic, sizeof(topic), stdin);
+  char topic[20];
+  fgets(topic, sizeof(topic), stdin);
 
-    //get rid of \n and lowercase all
-    for (int i = 0; i < sizeof(topic); i++) {
-      topic[i] = tolower(topic[i]);
-      if (topic[i] == '\n') {
-        topic[i] = '\0';
-        i = sizeof(topic);
-      }
-    }
+  //get rid of \n and lowercase all
+  for (int i = 0; i < sizeof(topic); i++) {
+	topic[i] = tolower(topic[i]);
+	if (topic[i] == '\n') {
+	  topic[i] = '\0';
+	  i = sizeof(topic);
+	}
+  }
 
-    int curr_player = 0;
-    // deal with point system, initialize everyone's point system to 0 here
-    // make an array of points?
+  /*
+  if (strcmp(topic, "history") != 0 || strcmp(topic, "geography") != 0 || strcmp(topic, "math")) {
+	printf("You get ONE more try\nPlease choose a topic (History, Geography, Math): ");
+	memset(topic, 0, sizeof(topic));
+	fgets(topic, sizeof(topic), stdin);
 
-    while(1){
-      // loop through the pipes to speak to a specific one
-		  char question[500];
-		  char answer[500];
-			memset(question, 0, sizeof(question));
-			memset(answer, 0, sizeof(answer));
-      find_question(topic, question, answer);
-				//printf("this is the answer from the while loop: %s\n", answer);
-      if(strlen(question)==0){
-        printf("No more questions! Game over.\n"); // separate display points function
-				delete_pipes();
-        break;
-      }
+	//get rid of \n and lowercase all
+	for (int i = 0; i < sizeof(topic); i++) {
+	  topic[i] = tolower(topic[i]);
+	  if (topic[i] == '\n') {
+		topic[i] = '\0';
+		i = sizeof(topic);
+	  }
+	}
+  }
+   */
+  int curr_player = 0;
+  // deal with point system, initialize everyone's point system to 0 here
+  // make an array of points?
 
-      // send question and answer to player through pipe!
-      int send_q = open(players[curr_player].pipe_name,O_WRONLY);
-      if (send_q < 0){
-				delete_pipes();
-        perror("cannot open player pipe");
-        break;
-      }	
-      write(send_q,question,strlen(question)+1);
-      close(send_q);
+  while(1){
+	// loop through the pipes to speak to a specific one
+	char question[500];
+	char answer[500];
+	memset(question, 0, sizeof(question));
+	memset(answer, 0, sizeof(answer));
+	find_question(topic, question, answer);
+	//printf("this is the answer from the while loop: %s\n", answer);
+	if(strlen(question)==0){
+	  printf("No more questions! Game over.\n"); // separate display points function
+	  delete_pipes();
+	  break;
+	}
 
-      // now wait for answer...
-      int get_a = open(players[curr_player].pipe_name,O_RDONLY);
-      if (get_a < 0){
-				delete_pipes();
-        perror("cannot open player pipe");
-        break;
-      }
+	// send question and answer to player through pipe!
+	int send_q = open(players[curr_player].pipe_name,O_WRONLY);
+	if (send_q < 0){
+	  delete_pipes();
+	  perror("cannot open player pipe");
+	  break;
+	}
+	write(send_q, "go", sizeof("go"));
+	printf("question: %s\n", question);
+	write(send_q,question,strlen(question)+1);
+	close(send_q);
 
-      char player_answer[500];
-      // ok so we have to make it so that the player pipe writing side will send in a stdin input
-      if(read(get_a, player_answer, sizeof(player_answer))>0){
-        player_answer[strcspn(player_answer, "\n")] = '\0'; // removes trailing newline
+	// now wait for answer...
+	int get_a = open(players[curr_player].pipe_name,O_RDONLY);
+	if (get_a < 0){
+	  delete_pipes();
+	  perror("cannot open player pipe");
+	  break;
+	}
 
-        if (strcmp(player_answer,"end")==0){
-          printf("Player ended the game.\n");
-          break;
-        }
-        else if (strcmp(player_answer,answer)==0){
-          printf("Correct! Point added.\n");
-          players[curr_player].score+=1;
-        }
-				else {
-						printf("Wrong! The right answer is: %s\n",answer);
-				}
-      }
-      close(get_a);
-			// unlink(players[curr_player].pipe_name);
+	char player_answer[500];
+	// ok so we have to make it so that the player pipe writing side will send in a stdin input
+	if(read(get_a, player_answer, sizeof(player_answer))>0){
+	  player_answer[strcspn(player_answer, "\n")] = '\0'; // removes trailing newline
 
-      curr_player = (curr_player+1)%num_players; // so it wraps
-    }
-    print_points();
-    delete_pipes();
-    return 0;
+	  if (strcmp(player_answer,"end")==0){
+		printf("Player ended the game.\n");
+		break;
+	  }
+	  else if (strcmp(player_answer,answer)==0){
+		printf("Correct! Point added.\n");
+		players[curr_player].score+=1;
+	  }
+	  else {
+		printf("Wrong! The right answer is: %s\n",answer);
+	  }
+	}
+	close(get_a);
+	// unlink(players[curr_player].pipe_name);
+
+	curr_player = (curr_player+1)%num_players; // so it wraps
+  }
+  print_points();
+  delete_pipes();
+  return 0;
 }
 
 /* Called in main whenever the host should ask another question.
