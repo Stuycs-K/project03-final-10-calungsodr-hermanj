@@ -4,8 +4,8 @@
 // singhandler
 // for pipe, look for sigpipe
 static void sighandler(int signo){
-	if (signo == SIGINT || signo == SIGPIPE){
-		printf("\nPlayer disconnected. Cleaning to continue game...\n");
+    if (signo == SIGINT || signo == SIGPIPE){
+        printf("\nPlayer disconnected. Cleaning to continue game...\n");
 
 		// unlink itself
 		char player_pipe[100];
@@ -19,8 +19,8 @@ static void sighandler(int signo){
 			write(send_pid,exit_msg, sizeof(exit_msg));
 			close(send_pid);
 		}*/
-		exit(0);
-	}
+        exit(0);
+    }
 }
 
 
@@ -28,8 +28,8 @@ static void sighandler(int signo){
 
 int main() {
 
-	signal(SIGPIPE, sighandler);
-	signal(SIGINT, sighandler);
+    signal(SIGPIPE, sighandler);
+    signal(SIGINT, sighandler);
 
 	//prompts the user for the answer
 	//connecting to WKP
@@ -53,7 +53,7 @@ int main() {
 	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
 	printf("Player has joined the game! Waiting...\n");
-		
+
 	char end_buff[100];
 	// wait for questions!
 	while (1){
@@ -74,7 +74,7 @@ int main() {
 					//open private pipe to read question and answer
 
 					printf("Here's your question...: %s\n", end_buff);
-					
+
 					char q_buff[300];
 					char a_buff[300];
 					char correct_a[300];
@@ -82,14 +82,14 @@ int main() {
 					memset(correct_a, 0, sizeof(correct_a));
 					memset(q_buff, 0, sizeof(q_buff)); // clear before start
 					memset(a_buff, 0, sizeof(a_buff));
-					
+
 
 					read(open_pp,q_buff,sizeof(q_buff)); //get question from host
 					//printf("sample question: %s\n", q_buff);
 					read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
 					close(open_pp);
 					//printf("sample answer: %s\n", correct_a);
-					
+
 
 					printf("Your answer: ");
 					fgets(a_buff, sizeof(a_buff), stdin);
