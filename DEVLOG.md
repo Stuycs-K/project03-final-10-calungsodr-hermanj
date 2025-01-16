@@ -56,6 +56,15 @@ function that's used to find a question to fix another error where
 the game would not quit when the question bank is depleted. Improved
 host sighandling to communicate with player (to be fixed further).
 
+### 2024-01-15 - Resolving issues
+Spent 40 minutes in class handling more errors and fixing up bugs,
+determining how to restructure incorrect home with Joy.
+
+Spent 1 hour at home rewriting the code so that the players array is 
+dynamically allocated (players can choose how many people are going
+to play), attempted to allow for a player to be removed without 
+stopping the game.
+
 
 
 

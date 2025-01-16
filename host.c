@@ -1,11 +1,4 @@
 
-#include "host.h"
-
-#define MAX_PLAYERS 3
-#define MAX_QUESTION 5;
-
-//  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
-
 /*
 
 GAME HOST (main) should:
@@ -25,7 +18,22 @@ to the next question.
 
 CURRENT PROBLEMS: 
 - exiting the host doesnt make the player exit
+<<<<<<< HEAD
+=======
+- lowercase for answers (not case sensitive, also add in instructions)
+
+
+bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
+- using ctrl c on host to exit only works under certain conditions
+>>>>>>> main
 */
+
+#include "host.h"
+
+#define MAX_QUESTION 5;
+
+//  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
+
 
 struct player_struct {
   int pid;
@@ -33,23 +41,29 @@ struct player_struct {
   int score;
 };
 
-struct player_struct players[MAX_PLAYERS]; // array of players!!!
+struct player_struct *players = NULL; // to be set later w/ correct amnt of players
 int num_players = 0;
 static int histq_num = 0;
 static int geoq_num = 0;
 static int mathq_num = 0;
 
 struct player_struct create_player(char* player_num){
-// use heap memory, so calloc or malloc
   struct player_struct p;
   snprintf(p.pipe_name,20,"%s",player_num); // use player index for pipe name
   p.score = 0;
   return p;
 }
 
+// i pray this is correct
+void remove_player(int ind){
+  unlink(players[ind].pipe_name);
+  for (int i = ind; i<num_players-1; i++) players[i]=players[i+1];
+  num_players--;
+}
+
 void print_points(){
   printf("FINAL POINT COUNT:\n");
-    for (int i = 0; i<MAX_PLAYERS; i++){
+    for (int i = 0; i<num_players; i++){
 	    printf("Player %d: %d\n", i+1, players[i].score);
     // possible add-on -- tell who the winner is
   }
@@ -58,8 +72,11 @@ void print_points(){
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
-			char end[100] = "end";
-			write(pp, end, sizeof(end));
+      if(pp>=0){ // if can open the pipe
+        char end[100] = "end";
+			  write(pp, end, sizeof(end));
+        close(pp);
+      }
       unlink(players[i].pipe_name);
   }
   unlink(WKP);
@@ -70,19 +87,27 @@ void delete_pipes(){
 static void sighandler(int signo){
   if (signo == SIGINT){
     printf("\nDisconnected game. Players will be disconnected automatically.\n");
-    for (int i = 0; i<MAX_PLAYERS; i++){
-      if (players[i].pid>0){
-        kill(players[i].pid,SIGINT);
-      }
-    }
     delete_pipes();
-    remove(WKP);
+    free(players);
     exit(0);
   }
   if (signo == SIGPIPE){
-    printf("\nDisconnected pipe.\n");
-		delete_pipes();
-		exit(0);
+    printf("\nPlayer disconnected.\n");
+    for (int i = 0; i<num_players; i++){
+      int pp = open(players[i].pipe_name, O_WRONLY);
+      if (pp<0){ // can't open pipe because it's gone!!
+        printf("Removing disconnected player...");
+        remove_player(i);
+        i--;
+      }
+      else (close(pp));
+    }
+    if (num_players==0){
+      printf("All players have disconnected. GAME END.\n");
+      free(players);
+      delete_pipes();
+      exit(0);
+    }
   }
 }
 
@@ -92,33 +117,48 @@ int main(){
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
 
+    printf("\nHow many players (1-5)? \n");
+    char play_num[3];
+    fgets(play_num, sizeof(play_num), stdin);
+    num_players = atoi(play_num); // makes string number
+    while (num_players<1 || num_players>5) {
+      printf("Invalid number of players. Please enter a number between 1 and 5: ");
+      fgets(play_num, sizeof(play_num), stdin);
+      num_players = atoi(play_num); // makes string number
+    }
+
+    players = malloc(num_players*sizeof(struct player_struct));
+    if (players == NULL){
+      perror("didn't allocate mem correctly");
+      exit(1);
+    }
+
     // make WKP
     if (mkfifo(WKP, 0644)<0) {
       perror("error in making WKP");
     }
 
-    printf("Server setup finished, waiting for %d players to join! (Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
+    printf("Server setup finished, waiting for %d players to join!\n(Tip: type './player' in a different terminal window.)\n\n", num_players);
 
     // open wkp.[blocks]
     int from_client = open(WKP, O_RDONLY);
     if (from_client==-1) perror("can't open WKP 1");
 
     char player_pipe[20];
-    // for every player ! need the max to begin
-    while (num_players<MAX_PLAYERS){
-      // if there's something to read!
+    int players_joined = 0;
+    while (players_joined<num_players){
       if (read(from_client,player_pipe,sizeof(player_pipe))>0){
-        players[num_players] = create_player(player_pipe);
+        players[players_joined] = create_player(player_pipe);
 
-        mkfifo(players[num_players].pipe_name, 0644);
-        printf("Player %d joined!\n", num_players+1);
-        num_players++;
+        mkfifo(players[players_joined].pipe_name, 0644);
+        printf("Player %d joined!\n", players_joined+1);
+        players_joined++;
       }
     }
 
     close(from_client);
 
-    printf("welcome, instructions here...\n");
+    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
     printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
 
     char topic[20];
@@ -136,17 +176,17 @@ int main(){
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
-  
-    while(1){
+
+    while(num_players>0){ // while there are still players in the game!
       // loop through the pipes to speak to a specific one
 		  char question[500];
 		  char answer[500];
 			memset(question, 0, sizeof(question));
 			memset(answer, 0, sizeof(answer));
       find_question(topic, question, answer);
-				//printf("this is the answer from the while loop: %s\n", answer);
+
       if(strlen(question)==0){
-        printf("No more questions! Game over.\n"); // separate display points function
+        printf("No more questions! Game over.\n"); 
 				delete_pipes();
         break;
       }
@@ -154,9 +194,9 @@ int main(){
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
-				delete_pipes();
-        perror("cannot open player pipe");
-        break;
+        printf("Player %d disconnected. Continuing...\n", curr_player+1);
+        remove_player(curr_player);
+        continue;
       }	
       write(send_q,question,strlen(question)+1);
       close(send_q);
@@ -191,6 +231,7 @@ int main(){
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
+    free(players);
     print_points();
     delete_pipes();
     return 0;
