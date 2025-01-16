@@ -11,5 +11,8 @@
 
 #define PLAYER_H
 #define WKP "mario"
+
+static void sighandler(int signo);
+int main();
     
 #endif

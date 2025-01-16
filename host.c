@@ -1,36 +1,15 @@
 
-/*
-
-GAME HOST (main) should:
-1. Allow multiple players to join the game. (fork process) do we need server?
-2. Print an introduction and instructions for the players.
-3. Assign player numbers. First to join is player one, second is player 2, and so on...
-5. After selection, the host will access the corresponding topic's Q&A file, read it as
-intended to place the current question and answer into shared memory.
-6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
-to the next question.
-7. Keep asking questions until a user types "end game" or the Q&A file ends.
-
-1/11 update to implement
-1. player sends the host its PID (which will be the pipe name)
-2. host adds each PID to an array that stores the pipe names
-3. the host loops through this array of pipes to know which pipe to send a question to
-
-CURRENT PROBLEMS: 
+/* CURRENT PROBLEMS: 
 - exiting the host doesnt make the player exit
-- lowercase for answers (not case sensitive, also add in instructions)
-
+- exiting the pipe should allow the game to continue
 
 bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
-- using ctrl c on host to exit only works under certain conditions
-*/
+- using ctrl c on host to exit only works under certain conditions */
+
 
 #include "host.h"
 
-#define MAX_QUESTION 5;
-
 //  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
-
 
 struct player_struct {
   int pid;
@@ -155,8 +134,8 @@ int main(){
 
     close(from_client);
 
-    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
-    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
+    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score.\n\nTO END GAME, TYPE 'end'.\n\n");
+    printf("Please choose a topic (History, Geography, Math): "); 
 
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
@@ -172,7 +151,6 @@ int main(){
 
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
-    // make an array of points?
 
     while(num_players>0){ // while there are still players in the game!
       // loop through the pipes to speak to a specific one
