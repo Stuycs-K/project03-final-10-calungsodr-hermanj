@@ -69,7 +69,7 @@ void print_points(){
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
-      if(pp>=0){ // if opened
+      if(pp>=0){ // if can open the pipe
         char end[100] = "end";
 			  write(pp, end, sizeof(end));
         close(pp);
@@ -90,7 +90,21 @@ static void sighandler(int signo){
   }
   if (signo == SIGPIPE){
     printf("\nPlayer disconnected.\n");
-		exit(0);
+    for (int i = 0; i<num_players; i++){
+      int pp = open(players[i].pipe_name, O_WRONLY);
+      if (pp<0){ // can't open pipe because it's gone!!
+        printf("Removing disconnected player...");
+        remove_player(i);
+        i--;
+      }
+      else (close(pp));
+    }
+    if (num_players==0){
+      printf("All players have disconnected. GAME END.\n");
+      free(players);
+      delete_pipes();
+      exit(0);
+    }
   }
 }
 
@@ -116,7 +130,6 @@ int main(){
       exit(1);
     }
 
-
     // make WKP
     if (mkfifo(WKP, 0644)<0) {
       perror("error in making WKP");
@@ -130,9 +143,7 @@ int main(){
 
     char player_pipe[20];
     int players_joined = 0;
-    // for every player ! need the max to begin
     while (players_joined<num_players){
-      // if there's something to read!
       if (read(from_client,player_pipe,sizeof(player_pipe))>0){
         players[players_joined] = create_player(player_pipe);
 
@@ -163,16 +174,16 @@ int main(){
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
 
-    while(1){
+    while(num_players>0){ // while there are still players in the game!
       // loop through the pipes to speak to a specific one
 		  char question[500];
 		  char answer[500];
 			memset(question, 0, sizeof(question));
 			memset(answer, 0, sizeof(answer));
       find_question(topic, question, answer);
-				//printf("this is the answer from the while loop: %s\n", answer);
+
       if(strlen(question)==0){
-        printf("No more questions! Game over.\n"); // separate display points function
+        printf("No more questions! Game over.\n"); 
 				delete_pipes();
         break;
       }
@@ -180,9 +191,9 @@ int main(){
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
-				delete_pipes();
-        perror("cannot open player pipe");
-        break;
+        printf("Player %d disconnected. Continuing...\n", curr_player+1);
+        remove_player(curr_player);
+        continue;
       }	
       write(send_q,question,strlen(question)+1);
       close(send_q);
