@@ -125,3 +125,9 @@ insensitive and added some instructions
 ### 2024-01-15 - game end and question sending
 Spent 30 minutes of free trying to find why the question doesnt send
 sometimes now.
+
+Spent class time finding bugs and working on them
+
+### 2024-01-16 - code
+Spent 50 minutes at home and some of free to make sure our code is on
+the same page because somehow it wasn't in class. 
