@@ -25,7 +25,6 @@ to the next question.
 
 CURRENT PROBLEMS: 
 - exiting the host doesnt make the player exit
-- lowercase for answers (not case sensitive, also add in instructions)
 */
 
 struct player_struct {
