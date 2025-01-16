@@ -6,6 +6,7 @@
 static void sighandler(int signo){
     if (signo == SIGINT || signo == SIGPIPE){
         printf("\nPlayer disconnected. Ending game...\n");
+		// how tounlink itself
 
 		/*int send_pid = open(WKP, O_WRONLY);
 		if (send_pid >= 0) {
@@ -28,7 +29,7 @@ int main() {
 	//prompts the user for the answer
 	//connecting to WKP
 	char player_pipe[500];
-		char buffer[500];
+	char buffer[500];
 
 	// send PID to WKP
 	int send_pid = open(WKP, O_WRONLY);

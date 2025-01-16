@@ -1,11 +1,4 @@
 
-#include "host.h"
-
-#define MAX_PLAYERS 2 // can make this chosen by user, but how? 
-#define MAX_QUESTION 5;
-
-//  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
-
 /*
 
 GAME HOST (main) should:
@@ -32,29 +25,42 @@ bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
 - using ctrl c on host to exit only works under certain conditions
 */
 
+#include "host.h"
+
+#define MAX_QUESTION 5;
+
+//  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
+
+
 struct player_struct {
   int pid;
   char pipe_name[20];
   int score;
 };
 
-struct player_struct players[MAX_PLAYERS]; // array of players!!!
+struct player_struct *players = NULL; // to be set later w/ correct amnt of players
 int num_players = 0;
 static int histq_num = 0;
 static int geoq_num = 0;
 static int mathq_num = 0;
 
 struct player_struct create_player(char* player_num){
-// use heap memory, so calloc or malloc
   struct player_struct p;
   snprintf(p.pipe_name,20,"%s",player_num); // use player index for pipe name
   p.score = 0;
   return p;
 }
 
+// i pray this is correct
+void remove_player(int ind){
+  unlink(players[ind].pipe_name);
+  for (int i = ind; i<num_players-1; i++) players[i]=players[i+1];
+  num_players--;
+}
+
 void print_points(){
   printf("FINAL POINT COUNT:\n");
-    for (int i = 0; i<MAX_PLAYERS; i++){
+    for (int i = 0; i<num_players; i++){
 	    printf("Player %d: %d\n", i+1, players[i].score);
     // possible add-on -- tell who the winner is
   }
@@ -63,8 +69,11 @@ void print_points(){
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
-			char end[100] = "end";
-			write(pp, end, sizeof(end));
+      if(pp>=0){ // if opened
+        char end[100] = "end";
+			  write(pp, end, sizeof(end));
+        close(pp);
+      }
       unlink(players[i].pipe_name);
   }
   unlink(WKP);
@@ -75,18 +84,12 @@ void delete_pipes(){
 static void sighandler(int signo){
   if (signo == SIGINT){
     printf("\nDisconnected game. Players will be disconnected automatically.\n");
-    for (int i = 0; i<MAX_PLAYERS; i++){
-      if (players[i].pid>0){
-        kill(players[i].pid,SIGINT);
-      }
-    }
     delete_pipes();
-    remove(WKP);
+    free(players);
     exit(0);
   }
   if (signo == SIGPIPE){
-    printf("\nDisconnected pipe.\n");
-		delete_pipes();
+    printf("\nPlayer disconnected.\n");
 		exit(0);
   }
 }
@@ -97,37 +100,49 @@ int main(){
     signal(SIGPIPE, sighandler);
     signal(SIGINT, sighandler);
 
+    printf("\nHow many players (1-5)? \n");
+    char play_num[3];
+    fgets(play_num, sizeof(play_num), stdin);
+    num_players = atoi(play_num); // makes string number
+    while (num_players<1 || num_players>5) {
+      printf("Invalid number of players. Please enter a number between 1 and 5: ");
+      fgets(play_num, sizeof(play_num), stdin);
+      num_players = atoi(play_num); // makes string number
+    }
+
+    players = malloc(num_players*sizeof(struct player_struct));
+    if (players == NULL){
+      perror("didn't allocate mem correctly");
+      exit(1);
+    }
+
+
     // make WKP
     if (mkfifo(WKP, 0644)<0) {
       perror("error in making WKP");
     }
 
-    printf("Server setup finished, waiting for %d players to join!\n(Tip: type './player' in a different terminal window.)\n\n", MAX_PLAYERS);
+    printf("Server setup finished, waiting for %d players to join!\n(Tip: type './player' in a different terminal window.)\n\n", num_players);
 
     // open wkp.[blocks]
     int from_client = open(WKP, O_RDONLY);
     if (from_client==-1) perror("can't open WKP 1");
 
     char player_pipe[20];
+    int players_joined = 0;
     // for every player ! need the max to begin
-    while (num_players<MAX_PLAYERS){
+    while (players_joined<num_players){
       // if there's something to read!
       if (read(from_client,player_pipe,sizeof(player_pipe))>0){
-        players[num_players] = create_player(player_pipe);
+        players[players_joined] = create_player(player_pipe);
 
-        mkfifo(players[num_players].pipe_name, 0644);
-        printf("Player %d joined!\n", num_players+1);
-        num_players++;
+        mkfifo(players[players_joined].pipe_name, 0644);
+        printf("Player %d joined!\n", players_joined+1);
+        players_joined++;
       }
     }
 
     close(from_client);
-
-    // printf("\nHow many players (1-5)? \n");
-    // char play_num[3];
-    // fgets(play_num, sizeof(play_num), stdin);
-    // MAX_PLAYERS = atoi(play_num);
-    // struct player_struct players[MAX_PLAYERS]; // array of players!!!
 
     printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
     printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
@@ -202,6 +217,7 @@ int main(){
 
       curr_player = (curr_player+1)%num_players; // so it wraps
     }
+    free(players);
     print_points();
     delete_pipes();
     return 0;
