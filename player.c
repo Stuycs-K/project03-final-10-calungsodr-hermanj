@@ -115,12 +115,3 @@ int main() {
 }
 
 // add exiting signals
-					printf("waiting for turn\n");
-	}
-		printf("GAME OVER\n");
-	unlink(player_pipe);
-	remove(player_pipe);
-	exit(0);
-}
-
-// add exiting signals
