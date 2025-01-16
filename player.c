@@ -4,8 +4,8 @@
 // singhandler
 // for pipe, look for sigpipe
 static void sighandler(int signo){
-    if (signo == SIGINT || signo == SIGPIPE){
-        printf("\nPlayer disconnected. Cleaning to continue game...\n");
+	if (signo == SIGINT || signo == SIGPIPE){
+		printf("\nPlayer disconnected. Cleaning to continue game...\n");
 
 		// unlink itself
 		char player_pipe[100];
@@ -19,8 +19,8 @@ static void sighandler(int signo){
 			write(send_pid,exit_msg, sizeof(exit_msg));
 			close(send_pid);
 		}*/
-        exit(0);
-    }
+		exit(0);
+	}
 }
 
 
@@ -28,8 +28,8 @@ static void sighandler(int signo){
 
 int main() {
 
-    signal(SIGPIPE, sighandler);
-    signal(SIGINT, sighandler);
+	signal(SIGPIPE, sighandler);
+	signal(SIGINT, sighandler);
 
 	//prompts the user for the answer
 	//connecting to WKP
@@ -45,7 +45,7 @@ int main() {
 
 	//making private pipe
 	int pid = getpid();
-	sprintf(player_pipe, "player%d", pid); 
+	sprintf(player_pipe, "player%d", pid);
 	mkfifo(player_pipe, 0666); // err
 
 	// send pipe name/pid to host
