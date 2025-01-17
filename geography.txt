@@ -3,3 +3,8 @@ What is the capital of China?:beijing
 What is the capital of the Philippines?:manila
 What is the largest continent?:asia
 What is the capital of Russia?:moscow
+Which country has the largest population?:china
+What is the capital of Canada?:ottawa
+What country are the Great Pyramids of Giza located in?:egypt
+Which country is also called The Netherlands?:holland
+How many countries are there in the United Kingdom?:4

@@ -47,7 +47,7 @@ int main() {
 	write(send_pid, player_pipe, strlen(player_pipe)+1);
 
 	printf("Player has joined the game! Waiting...\n");
-		
+
 	char end_buff[100];
 	// wait for questions!
 	while (1){
@@ -66,7 +66,6 @@ int main() {
 			break;
 		}
 		//open private pipe to read question and answer
-
 		printf("\n[TO END GAME, TYPE 'end'.]\n\nHere's your question...: %s\n", end_buff);
 					
 		char q_buff[300];

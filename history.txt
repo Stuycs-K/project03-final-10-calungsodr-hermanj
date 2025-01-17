@@ -3,3 +3,8 @@ What was the last name of the first president of the USA?:washington
 What is the last name of the US president known for his work combatting the Great Depression?:roosevelt
 What New York borough was the infamous WWII atomic bomb project named after?:manhattan
 What is the first name of the president during the Cuban Missile Crisis?:john
+Where did Albert Einstein live before moving to the United States?:germany
+What is the last name of the first person in the world to land on the moon?:armstrong
+Who was the first Emperor of Rome?:augustus
+What is the world’s oldest recorded civilization?:mesopotamia
+Who is the king of the Olympian gods in Greek mythology?:zeus
