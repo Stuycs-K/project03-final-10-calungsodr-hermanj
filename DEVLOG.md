@@ -65,6 +65,15 @@ dynamically allocated (players can choose how many people are going
 to play), attempted to allow for a player to be removed without 
 stopping the game.
 
+### 2024-01-16 - Memory allocation
+Spent 40 minutes in class testing and resolving issues with git 
+branches. Fixed faulty code and cut down on comments.
+
+Spent 40 minutes at home continuing to cut down comments and fix
+inconsistencies with formatting. Added additional locations
+for memory allocation and removed the code used to allow a 
+player to leave mid-game (not feasible because of the 
+host-player setup).
 
 
 
