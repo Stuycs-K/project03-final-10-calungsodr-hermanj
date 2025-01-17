@@ -23,6 +23,17 @@ Points are displayed after questions run out or if a player types 'end' to end t
 link here
   
 ### Instructions:
+To compile: "make compile"
 
-How does the user install/compile/run the program.
-How does the user interact with this program?
+To run host on first window: "./host"
+
+To run player on different window: "./player"
+
+To exit before game starts: "^c"
+
+To exit during game: players type "end" when prompted (which is every time)
+
+After running, type in the number of players playing and open the same number of new terminal 
+windows to run the player.
+
+Then choose a topic for the game.
