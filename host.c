@@ -1,7 +1,26 @@
 
 /*
 
+<<<<<<< HEAD
+GAME HOST (main) should:
+1. Allow multiple players to join the game. (fork process) do we need server?
+2. Print an introduction and instructions for the players.
+3. Assign player numbers. First to join is player one, second is player 2, and so on...
+5. After selection, the host will access the corresponding topic's Q&A file, read it as
+intended to place the current question and answer into shared memory.
+6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
+to the next question.
+7. Keep asking questions until a user types "end game" or the Q&A file ends.
+
+1/11 update to implement
+1. player sends the host its PID (which will be the pipe name)
+2. host adds each PID to an array that stores the pipe names
+3. the host loops through this array of pipes to know which pipe to send a question to
+
+CURRENT PROBLEMS:
+=======
 CURRENT PROBLEMS: 
+>>>>>>> main
 - exiting the host doesnt make the player exit
 
 
@@ -28,6 +47,7 @@ int num_players = 0;
 static int histq_num = 0;
 static int geoq_num = 0;
 static int mathq_num = 0;
+static int sciq_num = 0;
 
 struct player_struct create_player(char* player_num){
   struct player_struct p;
@@ -123,7 +143,7 @@ int main(){
     close(from_client);
 
     printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
-    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
+    printf("Please choose a topic (History, Geography, Math, Science): ");
 
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
@@ -226,6 +246,7 @@ void find_question(char *topic, char *question, char *answer) {
     if (strcmp(topic, "history") == 0) q_num = &histq_num;
     else if (strcmp(topic, "geography") == 0) q_num = &geoq_num;
     else if (strcmp(topic, "math") == 0) q_num = &mathq_num;
+	else if (strcmp(topic, "science") == 0) q_num = &sciq_num;
     else {
         fclose(readfile);
         return;
