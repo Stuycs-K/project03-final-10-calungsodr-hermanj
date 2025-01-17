@@ -6,7 +6,15 @@ Raechel Grace Calungsod, Joy Herman
        
 ### Project Description:
 
-Explain what is this project.
+Multiple users will be able to play a text-based multiplayer trivia game through the terminal. 
+After the players compile and run the program, text on the screen (the “game host”) will 
+welcome the users and explain game instructions. The host will display a number of question topics 
+(History, Geography, Math) for the game. Players enter the topic into the host screen, and the host 
+will start asking questions of this topic in rounds. Whoever gets the most points wins!
+
+### Video Demo
+
+link here
   
 ### Instructions:
 
