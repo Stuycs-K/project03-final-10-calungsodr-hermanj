@@ -140,3 +140,8 @@ Spent class time finding bugs and working on them
 ### 2024-01-16 - code
 Spent 50 minutes at home and some of free to make sure our code is on
 the same page because somehow it wasn't in class. 
+
+Spent class time trying to figure out why my code didn't run the same as 
+Raechel's computer and found out that it's just me and my laptop
+
+Spent 40 minutes at home adding a science topic and adding into the readme
