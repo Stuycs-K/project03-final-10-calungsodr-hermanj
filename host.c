@@ -1,6 +1,7 @@
 
 /*
 
+<<<<<<< HEAD
 GAME HOST (main) should:
 1. Allow multiple players to join the game. (fork process) do we need server?
 2. Print an introduction and instructions for the players.
@@ -17,8 +18,10 @@ to the next question.
 3. the host loops through this array of pipes to know which pipe to send a question to
 
 CURRENT PROBLEMS:
+=======
+CURRENT PROBLEMS: 
+>>>>>>> main
 - exiting the host doesnt make the player exit
-- lowercase for answers (not case sensitive, also add in instructions)
 
 
 bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
@@ -43,19 +46,13 @@ int num_players = 0;
 static int histq_num = 0;
 static int geoq_num = 0;
 static int mathq_num = 0;
+static int sciq_num = 0;
 
 struct player_struct create_player(char* player_num){
   struct player_struct p;
   snprintf(p.pipe_name,20,"%s",player_num); // use player index for pipe name
   p.score = 0;
   return p;
-}
-
-// i pray this is correct
-void remove_player(int ind){
-  unlink(players[ind].pipe_name);
-  for (int i = ind; i<num_players-1; i++) players[i]=players[i+1];
-  num_players--;
 }
 
 void print_points(){
@@ -69,7 +66,7 @@ void print_points(){
 void delete_pipes(){
   for (int i = 0; i<num_players; i++){
 			int pp = open(players[i].pipe_name, O_WRONLY);
-      if(pp>=0){ // if can open the pipe
+      if(pp>=0){ // if opened
         char end[100] = "end";
 			  write(pp, end, sizeof(end));
         close(pp);
@@ -90,21 +87,7 @@ static void sighandler(int signo){
   }
   if (signo == SIGPIPE){
     printf("\nPlayer disconnected.\n");
-    for (int i = 0; i<num_players; i++){
-      int pp = open(players[i].pipe_name, O_WRONLY);
-      if (pp<0){ // can't open pipe because it's gone!!
-        printf("Removing disconnected player...");
-        remove_player(i);
-        i--;
-      }
-      else (close(pp));
-    }
-    if (num_players==0){
-      printf("All players have disconnected. GAME END.\n");
-      free(players);
-      delete_pipes();
-      exit(0);
-    }
+		exit(0);
   }
 }
 
@@ -124,11 +107,12 @@ int main(){
       num_players = atoi(play_num); // makes string number
     }
 
-    players = malloc(num_players*sizeof(struct player_struct));
+    players = calloc(num_players,sizeof(struct player_struct));
     if (players == NULL){
-      perror("didn't allocate mem correctly");
+      perror("can't allocate mem for players correctly");
       exit(1);
     }
+
 
     // make WKP
     if (mkfifo(WKP, 0644)<0) {
@@ -143,7 +127,9 @@ int main(){
 
     char player_pipe[20];
     int players_joined = 0;
+    // for every player ! need the max to begin
     while (players_joined<num_players){
+      // if there's something to read!
       if (read(from_client,player_pipe,sizeof(player_pipe))>0){
         players[players_joined] = create_player(player_pipe);
 
@@ -156,7 +142,7 @@ int main(){
     close(from_client);
 
     printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
-    printf("Please choose a topic (History, Geography, Math): "); //1 is a place holder
+    printf("Please choose a topic (History, Geography, Math, Science): ");
 
     char topic[20];
     fgets(topic, sizeof(topic), stdin);
@@ -174,16 +160,16 @@ int main(){
     // deal with point system, initialize everyone's point system to 0 here
     // make an array of points?
 
-    while(num_players>0){ // while there are still players in the game!
+    while(1){
       // loop through the pipes to speak to a specific one
 		  char question[500];
 		  char answer[500];
 			memset(question, 0, sizeof(question));
 			memset(answer, 0, sizeof(answer));
       find_question(topic, question, answer);
-
+				//printf("this is the answer from the while loop: %s\n", answer);
       if(strlen(question)==0){
-        printf("No more questions! Game over.\n");
+        printf("No more questions! Game over.\n"); // separate display points function
 				delete_pipes();
         break;
       }
@@ -191,10 +177,10 @@ int main(){
       // send question and answer to player through pipe!
       int send_q = open(players[curr_player].pipe_name,O_WRONLY);
       if (send_q < 0){
-        printf("Player %d disconnected. Continuing...\n", curr_player+1);
-        remove_player(curr_player);
-        continue;
-      }
+				delete_pipes();
+        perror("cannot open player pipe");
+        break;
+      }	
       write(send_q,question,strlen(question)+1);
       close(send_q);
 
@@ -248,13 +234,18 @@ void find_question(char *topic, char *question, char *answer) {
         return;
     }
 
-    char line[1000];
+    char *line = malloc(1000*sizeof(char));
+    if (line==NULL){
+      perror("couldnt malloc for line in find_question");
+      fclose(readfile);
+    }
     int *q_num = NULL;
 
     // q_num points to the correct # question
     if (strcmp(topic, "history") == 0) q_num = &histq_num;
     else if (strcmp(topic, "geography") == 0) q_num = &geoq_num;
     else if (strcmp(topic, "math") == 0) q_num = &mathq_num;
+	else if (strcmp(topic, "science") == 0) q_num = &sciq_num;
     else {
         fclose(readfile);
         return;
@@ -262,7 +253,7 @@ void find_question(char *topic, char *question, char *answer) {
 
     // is the current line on the right number?
     int curr_line = 0;
-    while(fgets(line, sizeof(line), readfile)){
+    while(fgets(line, sizeof(char)*1000, readfile)){
       if(curr_line==*q_num){
         char * linepointer = line;
 	      char* q = strsep(&linepointer, ":");
@@ -279,4 +270,5 @@ void find_question(char *topic, char *question, char *answer) {
       curr_line++;
     }
     fclose(readfile);
+    free(line);
 }
