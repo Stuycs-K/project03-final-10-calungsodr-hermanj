@@ -1,26 +1,7 @@
 
 /*
 
-<<<<<<< HEAD
-GAME HOST (main) should:
-1. Allow multiple players to join the game. (fork process) do we need server?
-2. Print an introduction and instructions for the players.
-3. Assign player numbers. First to join is player one, second is player 2, and so on...
-5. After selection, the host will access the corresponding topic's Q&A file, read it as
-intended to place the current question and answer into shared memory.
-6. Each player gets a chance to answer a new question. If it's right. Add one point to that player, then move on
-to the next question.
-7. Keep asking questions until a user types "end game" or the Q&A file ends.
-
-1/11 update to implement
-1. player sends the host its PID (which will be the pipe name)
-2. host adds each PID to an array that stores the pipe names
-3. the host loops through this array of pipes to know which pipe to send a question to
-
-CURRENT PROBLEMS:
-=======
 CURRENT PROBLEMS: 
->>>>>>> main
 - exiting the host doesnt make the player exit
 
 
@@ -156,6 +137,33 @@ int main(){
         i = sizeof(topic);
       }
     }
+
+    /*
+        char topic[20];
+    fgets(topic, sizeof(topic), stdin);
+    
+    //get rid of \n and lowercase all
+      for (int i = 0; i < sizeof(topic); i++) {
+        topic[i] = tolower(topic[i]);
+        if (topic[i] == '\n') {
+          topic[i] = '\0';
+          i = sizeof(topic);
+        }
+      }
+
+    while (strcmp(topic,"math")!=0 || strcmp(topic,"geography")!=0 || strcmp(topic,"science")!=0 || strcmp(topic,"history")!=0) {
+      //get rid of \n and lowercase all
+      for (int i = 0; i < sizeof(topic); i++) {
+        topic[i] = tolower(topic[i]);
+        if (topic[i] == '\n') {
+          topic[i] = '\0';
+          i = sizeof(topic);
+        }
+      }
+      printf("Invalid topic! Choose again (History, Geography, Math, Science): ");
+      fgets(topic, sizeof(topic), stdin);
+    }
+    */
 
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
