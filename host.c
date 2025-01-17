@@ -5,8 +5,9 @@ CURRENT PROBLEMS:
 - exiting the host doesnt make the player exit
 
 
-bug: EXITING ON ONE CLIENT WILL NOT EXIT EVERYTHING
-- using ctrl c on host to exit only works under certain conditions
+bug: 
+- using ctrl c on host to exit the whole game only works before pipe looping. use "end" to end game.
+- a player can use ctrl c to leave, but the game will not continue.
 */
 
 #include "host.h"
