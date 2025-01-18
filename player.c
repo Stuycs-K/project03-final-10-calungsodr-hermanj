@@ -100,5 +100,3 @@ int main() {
 	free(player_pipe);
 	exit(0);
 }
-
-// add exiting signals

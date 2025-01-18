@@ -14,9 +14,6 @@ bug:
 
 #define MAX_QUESTION 5;
 
-//  REMINDER FOR LATER THAT WE NEED TO WRITE THE README
-
-
 struct player_struct {
   int pid;
   char pipe_name[20];
@@ -37,6 +34,7 @@ struct player_struct create_player(char* player_num){
   return p;
 }
 
+// print the final amount of points
 void print_points(){
   printf("FINAL POINT COUNT:\n");
   int winner_num = 0;
@@ -45,14 +43,14 @@ void print_points(){
 	for (int i = 0; i<num_players; i++){
 		printf("Player %d: %d\n", i+1, players[i].score);
 	  if (players[i].score > winner_points) {
-		winner_points = players[i].score;
-		winner_num = i;
-		tie = 1;
+      winner_points = players[i].score;
+      winner_num = i;
+      tie = 1;
 	  }
 	 else if (players[i].score == winner_points) {
 		tie = 0;
 	  }
-	// possible add-on -- tell who the winner is
+	// add-on -- tell who the winner is
   }
   if (winner_points == 0) {
 	printf("NO WINNER, SORE LOSERS\n");
@@ -93,7 +91,7 @@ static void sighandler(int signo){
   }
 }
 
-// handles flow of the game, forking(?)
+// handles flow of the game
 int main(){
     // for signals
     signal(SIGPIPE, sighandler);
@@ -207,7 +205,6 @@ int main(){
       }
 
       char player_answer[500];
-      // ok so we have to make it so that the player pipe writing side will send in a stdin input
       if(read(get_a, player_answer, sizeof(player_answer))>0){
         player_answer[strcspn(player_answer, "\n")] = '\0'; // removes trailing newline
 
