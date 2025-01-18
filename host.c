@@ -39,9 +39,29 @@ struct player_struct create_player(char* player_num){
 
 void print_points(){
   printf("FINAL POINT COUNT:\n");
-    for (int i = 0; i<num_players; i++){
-	    printf("Player %d: %d\n", i+1, players[i].score);
-    // possible add-on -- tell who the winner is
+  int winner_num = 0;
+  int winner_points = 0;
+  int tie = 0;
+	for (int i = 0; i<num_players; i++){
+		printf("Player %d: %d\n", i+1, players[i].score);
+	  if (players[i].score > winner_points) {
+		winner_points = players[i].score;
+		winner_num = i;
+		tie = 1;
+	  }
+	 else if (players[i].score == winner_points) {
+		tie = 0;
+	  }
+	// possible add-on -- tell who the winner is
+  }
+  if (winner_points == 0) {
+	printf("NO WINNER, SORE LOSERS\n");
+  }
+ else if (tie == 0) {
+   printf("TIE!!!\n");
+  }
+  else {
+	printf("Player %d is the WINNER!\n", winner_num+1);
   }
 }
 
@@ -123,7 +143,7 @@ int main(){
 
     close(from_client);
 
-    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\n\n");
+    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\nIf you dare answer when it is NOT your turn, you shall be punished and will not\nbe able to answer any more questions!!\n\n");
     printf("Please choose a topic (History, Geography, Math, Science): ");
 
     char topic[20];
