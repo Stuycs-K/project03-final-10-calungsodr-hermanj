@@ -41,19 +41,27 @@ void print_points(){
   printf("FINAL POINT COUNT:\n");
   int winner_num = 0;
   int winner_points = 0;
+  int tie = 0;
 	for (int i = 0; i<num_players; i++){
 		printf("Player %d: %d\n", i+1, players[i].score);
 	  if (players[i].score > winner_points) {
 		winner_points = players[i].score;
 		winner_num = i;
+		tie = 1;
+	  }
+	  if (players[i].score == winner_points) {
+		tie = 0;
 	  }
 	// possible add-on -- tell who the winner is
   }
   if (winner_points == 0) {
 	printf("NO WINNER, SORE LOSERS\n");
   }
+ else if (tie == 0) {
+   printf("TIE!!!\n");
+  }
   else {
-	printf("Player %d is the WINNER!", winner_num+1);
+	printf("Player %d is the WINNER!\n", winner_num+1);
   }
 }
 
