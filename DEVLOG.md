@@ -75,6 +75,14 @@ for memory allocation and removed the code used to allow a
 player to leave mid-game (not feasible because of the 
 host-player setup).
 
+### 2024-01-17 - Documentation and testing
+Spent 20 mintues in class writing the README and identifying
+errors (prompting user for topic doesn't loop as it should,
+there is a new error with ending the game).
+
+Spent 30 minutes at home successfully fixing the mistakes 
+identified today in class. 
+
 
 
 
