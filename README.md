@@ -23,17 +23,17 @@ Points are displayed after questions run out or if a player types 'end' to end t
 link here
   
 ### Instructions:
-To compile: "make compile"
+1. To compile: "make compile".
 
-To run host on first window: "./host"
+2. To run host on first window: "./host".
 
-To run player on different window: "./player"
+3. Type in the number of players playing, open that same number of new terminal
+windows.
 
-To exit before game starts: "^c"
+4. On each new terminal window, run player(s) with "./player".
 
-To exit during game: players type "end" when prompted (which is every time)
+5. To exit on the host window before game starts: "^c".
 
-After running, type in the number of players playing and open the same number of new terminal 
-windows to run the player.
+6. Choose a topic for the game.
 
-Then choose a topic for the game.
+7. Players answer when prompted. To end the game, players type "end" during their turn.
