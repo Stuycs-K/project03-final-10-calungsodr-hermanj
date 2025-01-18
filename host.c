@@ -39,9 +39,21 @@ struct player_struct create_player(char* player_num){
 
 void print_points(){
   printf("FINAL POINT COUNT:\n");
+  int winner_num = 0;
+  int winner_points = 0;
 	for (int i = 0; i<num_players; i++){
 		printf("Player %d: %d\n", i+1, players[i].score);
+	  if (players[i].score > winner_points) {
+		winner_points = players[i].score;
+		winner_num = i;
+	  }
 	// possible add-on -- tell who the winner is
+  }
+  if (winner_points == 0) {
+	printf("NO WINNER, SORE LOSERS\n")
+  }
+  else {
+	printf("Player %d is the WINNER!", winner_num+1);
   }
 }
 
