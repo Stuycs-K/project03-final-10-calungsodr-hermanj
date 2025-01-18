@@ -62,7 +62,7 @@ void delete_pipes(){
 // SIGNAL HANDLING
 static void sighandler(int signo){
   if (signo == SIGINT){
-    printf("\nDisconnected game. Players will be disconnected automatically.\n");
+    printf("\nHost disconnected game.\n");
     delete_pipes();
     free(players);
     exit(0);
@@ -138,32 +138,17 @@ int main(){
       }
     }
 
-    /*
-        char topic[20];
-    fgets(topic, sizeof(topic), stdin);
-    
-    //get rid of \n and lowercase all
-      for (int i = 0; i < sizeof(topic); i++) {
-        topic[i] = tolower(topic[i]);
-        if (topic[i] == '\n') {
-          topic[i] = '\0';
-          i = sizeof(topic);
-        }
-      }
-
-    while (strcmp(topic,"math")!=0 || strcmp(topic,"geography")!=0 || strcmp(topic,"science")!=0 || strcmp(topic,"history")!=0) {
-      //get rid of \n and lowercase all
-      for (int i = 0; i < sizeof(topic); i++) {
-        topic[i] = tolower(topic[i]);
-        if (topic[i] == '\n') {
-          topic[i] = '\0';
-          i = sizeof(topic);
-        }
-      }
+    while (strcmp(topic, "math") != 0 && strcmp(topic, "geography") != 0 && strcmp(topic, "science") != 0 && strcmp(topic, "history") != 0) {
       printf("Invalid topic! Choose again (History, Geography, Math, Science): ");
       fgets(topic, sizeof(topic), stdin);
+      for (int i = 0; i < sizeof(topic); i++) {
+          topic[i] = tolower(topic[i]);
+          if (topic[i] == '\n') {
+              topic[i] = '\0';
+              break;
+          }
+      }
     }
-    */
 
     int curr_player = 0;
     // deal with point system, initialize everyone's point system to 0 here
@@ -208,6 +193,7 @@ int main(){
 
         if (strcmp(player_answer,"end")==0){
           printf("Player ended the game.\n");
+          delete_pipes();
           break;
         }
         else if (strcmp(player_answer,answer)==0){
@@ -254,9 +240,10 @@ void find_question(char *topic, char *question, char *answer) {
     if (strcmp(topic, "history") == 0) q_num = &histq_num;
     else if (strcmp(topic, "geography") == 0) q_num = &geoq_num;
     else if (strcmp(topic, "math") == 0) q_num = &mathq_num;
-	else if (strcmp(topic, "science") == 0) q_num = &sciq_num;
+	  else if (strcmp(topic, "science") == 0) q_num = &sciq_num;
     else {
         fclose(readfile);
+        free(line);
         return;
     }
 
@@ -274,6 +261,7 @@ void find_question(char *topic, char *question, char *answer) {
         (*q_num)++;
 
         fclose(readfile);
+        free(line);
         return;
       }
       curr_line++;

@@ -6,13 +6,10 @@
 static void sighandler(int signo){
 	if (signo == SIGINT || signo == SIGPIPE){
 		printf("\nPlayer disconnected.\n");
-
-		// unlink itself
 		char player_pipe[100];
 		int pid=getpid();
 		sprintf(player_pipe,"player%d",pid);
 		unlink(player_pipe);
-
 		exit(0);
 	}
 }
@@ -66,7 +63,7 @@ int main() {
 			break;
 		}
 		//open private pipe to read question and answer
-		printf("\n[TO END GAME, TYPE 'end'.]\n\nHere's your question...: %s\n", end_buff);
+		printf("\nHere's your question...: %s\n", end_buff);
 					
 		char q_buff[300];
 		char a_buff[300];
@@ -81,13 +78,19 @@ int main() {
 		read(open_pp, correct_a, sizeof(correct_a)); //get correct answer from host
 		close(open_pp);
 		
-		printf("Your answer: ");
+		printf("Your answer (type 'end' to quit): ");
 		fgets(a_buff, sizeof(a_buff), stdin);
 		a_buff[strcspn(a_buff, "\n")] = '\0';
 
 		int send_a = open(player_pipe, O_WRONLY);
 		write(send_a,a_buff,strlen(a_buff)+1);
 		close(send_a);
+
+		if(strcmp(a_buff,"end")==0){
+			printf("Game ended. Closing!\n");
+			unlink(player_pipe);
+			exit(0);
+		}
 		printf("waiting for turn\n");
 	}
 	
