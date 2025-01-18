@@ -8,8 +8,11 @@
 #include <errno.h>
 
 #ifndef PLAYER_H
-#define PLAYER_H
 
+#define PLAYER_H
 #define WKP "mario"
+
+static void sighandler(int signo);
+int main();
     
 #endif
