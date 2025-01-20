@@ -141,7 +141,11 @@ int main(){
 
     close(from_client);
 
-    printf("\nWelcome to the game! After choosing a topic, each player will take turns to\nanswer a series of questions. One correct answer = one point for your score. If you wish to exit the game at any point, type 'end' instead\nof your answer.\nIf you dare answer when it is NOT your turn, you shall be punished and will not\nbe able to answer any more questions!!\n\n");
+    printf("\n\nWelcome to the game! After choosing a topic, each player will take turns to\n");
+    printf("answer a series of questions. 1 correct answer = 1 point.\n\n");
+    printf("If you wish to end the game at any point, type 'end' during your turn.\n\n");
+    printf("If you dare answer when it is NOT your turn, you shall be punished and will not\n");
+    printf("be able to answer any more questions!\n\n");
     printf("Please choose a topic (History, Geography, Math, Science): ");
 
     char topic[20];
