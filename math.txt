@@ -3,7 +3,7 @@ What is 12*6?:72
 What is 3*2?:6
 What is 10*22?:220
 What is 1+2?:3
-What is 73-12?:69
+What is 73-12?:61
 What is 35/7?:5
 What is 1*1*1*1*1*1?:1
 What is 2^2?:4
