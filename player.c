@@ -80,7 +80,16 @@ int main() {
 		
 		printf("Your answer (type 'end' to quit): ");
 		fgets(a_buff, sizeof(a_buff), stdin);
-		a_buff[strcspn(a_buff, "\n")] = '\0';
+
+		//get rid of \n and lowercase all
+		for (int i = 0; i < sizeof(a_buff); i++) {
+			a_buff[i] = tolower(a_buff[i]);
+			if (a_buff[i] == '\n') {
+			a_buff[i] = '\0';
+			i = sizeof(a_buff);
+			}
+		}
+
 
 		int send_a = open(player_pipe, O_WRONLY);
 		write(send_a,a_buff,strlen(a_buff)+1);
