@@ -18,9 +18,7 @@ means one point added to that player's score. Whoever gets the most points wins!
 
 Points are displayed after questions run out or if a player types 'end' to end the game.
 
-### Video Demo
-
-link here
+### [Video Demo link here](https://drive.google.com/file/d/1qXbkNguOeYj5CAjspb2gLirwliGbdAy5/view?usp=drivesdk)
   
 ### Instructions:
 1. To compile: "make compile".
